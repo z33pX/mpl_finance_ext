@@ -103,7 +103,7 @@ plt.show()
 
 The result looks like this:
 
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_06.png)
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_01.png)
 
 For further explanations for the parameters please look into the function description. 
 
