@@ -75,7 +75,7 @@ _, _ = mfe.plot_candlestick(
     disable_x_ticks=True,
 ```
 
-Now we plot the RSI_14 data in a separate chart:
+Now we plot the RSI_14 data in a separate chart with the `plot()` function:
 
 ```
 # Create second axis
@@ -110,4 +110,24 @@ For further explanations for the parameters please look into the function descri
 
 Plot filled OHLC chart
 -
-...
+It works exactly like the `plot_candlestick()`function.
+
+```
+fig, ax = mfe.plot_filled_ohlc(
+    data=data,
+    name='BTC_XRP_5min',
+    signals=signals,
+    plot_columns=[
+        'bband_upper_20', 'bband_lower_20',
+        'MA_36', 'EMA_8'
+    ],
+    draw_verticals=False,
+    draw_evaluation=True,
+    evaluation='rectangle',
+    # save='BTC_XRP_5min_filled.png'
+    )
+```
+
+Result:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_02.png)
