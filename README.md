@@ -105,6 +105,12 @@ The result looks like this:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_01.png)
 
+You can see that the signals are visualised in form of rectangles.
+Instead of rectangles you can activate arrows with `evaluation='arrow_1'`.
+It will look like this:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_03.png)
+
 For further explanations for the parameters please look into the function description. 
 
 

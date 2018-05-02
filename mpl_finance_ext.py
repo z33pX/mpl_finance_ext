@@ -109,7 +109,7 @@ def _tail(fig, ax, data, plot_columns, kwa):
     if plot_columns is not None:
         for col in plot_columns:
             series = data[col]
-            ax.plot(series)
+            ax.plot(series, linewidth=0.7)
             add_price_flag(
                 fig=fig, axis=ax,
                 series=data[col],

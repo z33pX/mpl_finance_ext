@@ -45,7 +45,6 @@ def draw_signal_evaluation(axis, data, signals, **kwargs):
     # http://matthiaseisen.com/pp/patterns/p0203/
 
     eval_type = kwargs.get('eval_type', 'rectangle')
-
     red = kwargs.get('red', 'red')
     green = kwargs.get('green', 'green')
 
@@ -89,53 +88,52 @@ def draw_signal_evaluation(axis, data, signals, **kwargs):
             green_dots_x.append(x + w)
             green_dots_y.append(y + h)
 
-        if eval_type is 'rectangle':
-            objects.append(
-                patches.Rectangle(
-                    (x, y), w, h,
-                    facecolor=color,
-                    edgecolor=color,
-                    linewidth=1,
-                    # linestyle='dotted',
-                    fill=True,
-                    alpha=0.14
-                )
-            )
-        elif eval_type is 'arrow_1':
-            objects.append(
-                patches.FancyArrowPatch(
+        if eval_type is 'arrow_1':
+            patch = patches.FancyArrowPatch(
                     (x, y), (x + w, y + h),
                     arrowstyle='-|>',
                     mutation_scale=20,
                     color=color
                 )
+
+        # eval_type is 'rectangle'
+        else:
+            patch = patches.Rectangle(
+                (x, y), w, h,
+                facecolor=color,
+                edgecolor=color,
+                linewidth=1,
+                # linestyle='dotted',
+                fill=True,
+                alpha=0.2
             )
 
-        # Add annotation ---------------------------
-        for r in objects:
-            ax.add_artist(r)
-            cx = x + w / 2.0
-            cy = y + h / 2.0
-            change = round(h / y * 100, 3)
+        objects.append(patch)
 
-            if eval_type is 'arrow_1':
-                bbox = {
-                    'facecolor': color,
-                    'edgecolor': color,
-                    'alpha': 0.3,
-                    'pad': 2
-                }
-            else:
-                bbox = None
+        # Add annotation -----------------------
+        ax.add_artist(patch)
+        cx = x + w / 2.0
+        cy = y + h / 2.0
+        change = round(h / y * 100, 3)
 
-            ax.annotate(
-                str(change), (cx, cy),
-                color=color,
-                fontsize=12, ha='center',
-                va='center',
-                bbox=bbox,
-                zorder=100
-            )
+        if eval_type is 'arrow_1':
+            bbox = {
+                'facecolor': color,
+                'edgecolor': color,
+                'alpha': 0.3,
+                'pad': 2
+            }
+        else:
+            bbox = None
+
+        ax.annotate(
+            str(change), (cx, cy),
+            color=color,
+            fontsize=12, ha='center',
+            va='center',
+            bbox=bbox,
+            zorder=100
+        )
 
     # Add dots
     if kwargs.get('dots', True):
