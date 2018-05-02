@@ -122,8 +122,8 @@ def example_1(data, signals):
             'MA_36', 'EMA_8'
         ],
         draw_verticals=False,
-        draw_evaluation=True,
-        evaluation='rectangle',
+        signl_evaluation=True,
+        signl_evaluation_form='rectangle',
         disable_x_ticks=True,
     )
 
@@ -166,11 +166,30 @@ def example_2(data, signals):
             'MA_36', 'EMA_8'
         ],
         draw_verticals=False,
-        draw_evaluation=True,
-        evaluation='rectangle',
+        signl_evaluation=True,
+        signl_evaluation_form='rectangle',
         # save='BTC_XRP_5min_filled.png'
     )
 
+def example_3(data, cs_patterns):
+    # Example 2)
+    # Alternative to the first example we dont use
+    # any given figure and axis.
+    # If no axis is provided it will plt.show the
+    # chart automatically. To disable this set show=False.
+    # To save the chart set save='path_to_png.png'
+
+    fig, ax = mfe.plot_candlestick(
+        data=data,
+        name='BTC_XRP_5min',
+        cs_patterns=cs_patterns,
+        plot_columns=[
+            'bband_upper_20', 'bband_lower_20',
+            'MA_36', 'EMA_8'
+        ],
+        draw_verticals=False,
+        # save='BTC_XRP_5min_filled.png'
+    )
 
 if __name__ == "__main__":
     # Load dataset -----------------------------------------------
@@ -194,7 +213,14 @@ if __name__ == "__main__":
         ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
     ]
 
+    # Some manually picked candlestick pattern
+    patterns = [
+        ['inverted_hammer', 12, 13]
+    ]
+
     # Examples ---------------------------------------------------
     example_1(data=data, signals=signals)
 
     example_2(data=data, signals=signals)
+
+    example_3(data=data.head(20), cs_patterns=patterns)

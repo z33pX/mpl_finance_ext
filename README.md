@@ -8,8 +8,9 @@ It supports mainly three functions:
 * Plot other stuff -- `plot()`
 
 For every function signal evaluation is possible. That means when you have buy and sell signals
-provided by an algotrading algorithm for example you can plot them in the graph to get a visal picture.
-The yield of buy and sell will be calculated and is explained in the graph as well. All this will be shown in
+provided by an algotrading algorithm for example you can plot them in the graph to get a visal 
+picture (same for candlestick patterns).
+The yield of buy and sell will be calculated and is shown in the graph as well. All this will be shown in
 a few examples below. All following code is provided in `examples.py`.
 
 First we load the data and calculate some example indicators:
@@ -34,6 +35,11 @@ signals = [
     ('BUY', 56, 0.6563), ('SELL', 81, 0.6854),
     ('BUY', 106, 0.665), ('SELL', 165, 0.640),
     ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
+]
+
+# Some manually picked candlestick pattern
+patterns = [
+    ['inverted_hammer', 12, 13]
 ]
 ```
 
@@ -75,7 +81,7 @@ _, _ = mfe.plot_candlestick(
     disable_x_ticks=True,
 ```
 
-Now we plot the RSI_14 data in a separate chart with the `plot()` function:
+Now we plot the RSI_14 data on a separate axis with the `plot()` function:
 
 ```
 # Create second axis
@@ -98,25 +104,18 @@ mfe.plot(
 )
 
 plt.show()
-
 ```
 
 The result looks like this:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_01.png)
 
-You can see that the signals are visualised in form of rectangles.
-Instead of rectangles you can activate arrows with `evaluation='arrow_1'`.
-It will look like this:
-
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_03.png)
-
 For further explanations for the parameters please look into the function description. 
 
 
 Plot filled OHLC charts
 -
-It works exactly like the `plot_candlestick()`function.
+`plot_filled_ohlc()` works exactly like `plot_candlestick()`.
 
 ```
 fig, ax = mfe.plot_filled_ohlc(
@@ -137,3 +136,45 @@ fig, ax = mfe.plot_filled_ohlc(
 Result:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_02.png)
+
+Signal evaluation
+-
+
+As mentioned in earlier examples the signal evaluation can be activated
+by defining a list of signals and set the parameter `signals=signals` of
+`plot_filled_ohlc()` or `plot_candlestick()`:
+
+```
+signals = [
+    ('BUY', 12, 0.69), ('SELL', 27, 0.7028),
+    ('BUY', 56, 0.6563), ('SELL', 81, 0.6854),
+    ('BUY', 106, 0.665), ('SELL', 165, 0.640),
+    ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
+]
+```
+Structure of the list: `[ ..., (signal, index, price), ... ]`. 
+Signals can be either `'BUY'` or `'SELL'`.
+
+In previous examples you can see that the signals are visualised in form of rectangles.
+Instead of rectangles you can activate arrows with `evaluation='arrow_1'`.
+It will look like this:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_03.png)
+
+Candlestick pattern evaluation
+-
+
+To plot a list of candlestick patterns just set the parameter `cs_patterns=cs_patterns` 
+to a valid list of patterns like:
+
+```
+patterns = [
+    ['inverted_hammer', 12, 13]
+]
+```
+
+Structure of the list: `[ ... ,['pattern_name', start_index, stop_index], ... ]`
+
+Result:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_04.png)
