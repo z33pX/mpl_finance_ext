@@ -7,6 +7,7 @@ from matplotlib.patches import BoxStyle
 from six.moves import xrange, zip
 
 from angled_box_style import AngledBoxStyle
+from candlestick_pattern_evaluation import draw_pattern_evaluation
 from signal_evaluation import draw_signal_evaluation
 from signal_evaluation import draw_verticals
 
@@ -95,7 +96,6 @@ def _candlestick2_ohlc(
 
 
 def _tail(fig, ax, data, plot_columns, kwa):
-
     name = kwa.get('name', None)
     if name is not None:
         ax.text(
@@ -186,17 +186,52 @@ def _head(data, kwargs):
     return fig, ax
 
 
-def _signal_eval(data, ax, signals, kwargs):
+def _signal_eval(ax, signals, kwargs):
+    """
+    Plots the signals
+    :param ax: Axis
+    :param signals: List of patterns with structure:
+        [ ..., ['signal', index, price], ...], where
+        signal can be either 'BUY' or 'SELL'
+    :param kwargs:
+        'draw_verticals': Plots vertical lines for each BUY and SELL
+        'signl_evaluation': Plot signals
+        'signl_evaluation_form': 'rectangles' or 'arrows_1'
+        'dots': Plot dots at 'BUY' and 'SELL' points
+    :return:
+    """
     if signals is not None:
         if kwargs.get('draw_verticals', True):
             draw_verticals(axis=ax, signals=signals)
-        if kwargs.get('draw_evaluation', True):
+        if kwargs.get('signal_evaluation', True):
             draw_signal_evaluation(
                 axis=ax,
-                data=data['close'],
                 signals=signals,
-                eval_type=kwargs.get('evaluation', 'rectangle'),
+                eval_type=kwargs.get('signal_evaluation_form', 'rectangle'),
                 dots=kwargs.get('dots', True),
+                red=red,
+                green=green
+            )
+
+
+def _pattern_eval(data, ax, cs_patterns, kwargs):
+    """
+    Plots the candlestick patterns
+    :param data: Data
+    :param ax: Axis
+    :param cs_patterns: List of patterns with structure:
+        [ ..., ['pattern_name', start_index, stop_index], ...]
+    :param kwargs:
+        'cs_pattern_evaluation': Enable plotting
+    :return:
+    """
+    if cs_patterns is not None:
+        if kwargs.get('cs_pattern_evaluation', True):
+            df = data[['open', 'high', 'low', 'close']]
+            draw_pattern_evaluation(
+                axis=ax,
+                data_ohlc=df,
+                cs_patterns=cs_patterns,
                 red=red,
                 green=green
             )
@@ -272,7 +307,9 @@ def add_price_flag(fig, axis, series, color):
     )
 
 
-def plot_candlestick(data, signals=None, plot_columns=None, **kwargs):
+def plot_candlestick(
+        data, signals=None, cs_patterns=None,
+        plot_columns=None, **kwargs):
     """
     This function plots a candlestick chart
     :param data: Pandas DataFrame
@@ -286,6 +323,11 @@ def plot_candlestick(data, signals=None, plot_columns=None, **kwargs):
         'axis': Axis. If axis is not given the chart will
             plt.plot automatically
         'name': Name of the chart
+        'draw_verticals': plots vertical lines for each BUY and SELL
+        'signl_evaluation': plot signals
+        'signl_evaluation_form': 'rectangles' or 'arrows_1'
+        'cs_pattern_evaluation': plot candlestick pattern
+        'dots': Plot dots at 'BUY' and 'SELL' points
         'xhline1': Normal horizontal line 1
         'xhline2': Normal horizontal line 1
         'xhline_red': Red horizontal line
@@ -301,7 +343,6 @@ def plot_candlestick(data, signals=None, plot_columns=None, **kwargs):
             save='path_to_picture.png'
     :return: fig, ax
     """
-
     fig, ax = _head(data, kwargs)
 
     # Add candlestick
@@ -315,12 +356,15 @@ def plot_candlestick(data, signals=None, plot_columns=None, **kwargs):
         alpha=1
     )
 
-    _signal_eval(data, ax, signals, kwargs)
+    _signal_eval(ax, signals, kwargs)
+    _pattern_eval(data, ax, cs_patterns, kwargs)
 
     return _tail(fig, ax, data, plot_columns, kwargs)
 
 
-def plot_filled_ohlc(data, signals=None, plot_columns=None, **kwargs):
+def plot_filled_ohlc(
+        data, signals=None, cs_patterns=None,
+        plot_columns=None, **kwargs):
     """
     This function plots a filled ohlc chart
     :param data: Pandas DataFrame
@@ -334,6 +378,11 @@ def plot_filled_ohlc(data, signals=None, plot_columns=None, **kwargs):
         'axis': Axis. If axis is not given the chart will
             plt.plot automatically
         'name': Name of the chart
+        'draw_verticals': plots vertical lines for each BUY and SELL
+        'signl_evaluation': plot signals
+        'signl_evaluation_form': 'rectangles' or 'arrows_1'
+        'cs_pattern_evaluation': plot candlestick pattern
+        'dots': Plot dots at 'BUY' and 'SELL' points
         'xhline1': Normal horizontal line 1
         'xhline2': Normal horizontal line 1
         'xhline_red': Red horizontal line
@@ -349,7 +398,6 @@ def plot_filled_ohlc(data, signals=None, plot_columns=None, **kwargs):
             save='path_to_picture.png'
     :return: fig, ax
     """
-
     fig, ax = _head(data, kwargs)
 
     # Add filled_ohlc
@@ -374,7 +422,8 @@ def plot_filled_ohlc(data, signals=None, plot_columns=None, **kwargs):
         edgecolor=red
     )
 
-    _signal_eval(data, ax, signals, kwargs)
+    _signal_eval(ax, signals, kwargs)
+    _pattern_eval(data, ax, cs_patterns, kwargs)
 
     return _tail(fig, ax, data, plot_columns, kwargs)
 
@@ -382,8 +431,7 @@ def plot_filled_ohlc(data, signals=None, plot_columns=None, **kwargs):
 def plot(data, plot_columns, **kwargs):
     """
     This function provides a simple way to plot time series
-    for example
-    in data or data['close'].
+    for example data['close'].
     :param data: Pandas DataFrame object
     :param plot_columns: Name of the columns to plot
     :param kwargs:

@@ -114,7 +114,7 @@ It will look like this:
 For further explanations for the parameters please look into the function description. 
 
 
-Plot filled OHLC chart
+Plot filled OHLC charts
 -
 It works exactly like the `plot_candlestick()`function.
 

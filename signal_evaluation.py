@@ -21,7 +21,7 @@ def draw_verticals(axis, signals):
                          alpha=0.8, linestyle='-')
 
 
-def draw_signal_evaluation(axis, data, signals, **kwargs):
+def draw_signal_evaluation(axis, signals, **kwargs):
     signal_pairs = list()
 
     # Create list of BUY and SELL pairs --------------
@@ -65,10 +65,8 @@ def draw_signal_evaluation(axis, data, signals, **kwargs):
     for signal in signal_pairs:
         try:
             x = signal[0][1]
-            # y = data.get(signal[0][1])
             y = signal[0][2]
             w = signal[1][1] - x
-            # h = data.get(signal[1][1]) - y
             h = signal[1][2] - y
         except TypeError:
             raise TypeError(
