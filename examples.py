@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 import mpl_finance_ext as mfe
@@ -191,6 +192,66 @@ def example_3(data, cs_patterns):
         # save='BTC_XRP_5min_filled.png'
     )
 
+
+def example_4(data):
+    fig, _ = plt.subplots(
+        facecolor=mfe.background_color
+    )
+
+    # Plot pattern with return histogram
+    ax2 = plt.subplot2grid(
+        (8, 8), (0, 0),
+        rowspan=4, colspan=8,
+        facecolor=mfe.background_color
+    )
+
+    mu, sigma = 100, 15
+    x = mu + sigma * np.random.randn(10000)
+
+    mfe.hist_from_dict(
+        fig=fig,
+        axis=ax2,
+        data_dict=x,
+        bins=50,
+        density=1,
+        xlabel='Returns',
+        ylabel='Probability density'
+    )
+
+    # Pattern histogram
+    ax3 = plt.subplot2grid(
+        (8, 4), (4, 1),
+        rowspan=4, colspan=7,
+        facecolor=mfe.background_color
+    )
+
+    pattern_history = [
+        'berish_hanging_man',
+        'bulish_hammer',
+        'berish_dark_cloud_cover',
+        'bulish_piercing_line',
+        'berish_dark_cloud_cover',
+        'berish_dark_cloud_cover',
+        'bulish_hammer',
+        'berish_hanging_man',
+        'bulish_hammer',
+        'bulish_morning_star',
+    ]
+
+    mfe.bars_from_dict(
+        fig=fig,
+        axis=ax3,
+        data_dict=pattern_history,
+        xlabel='Amount',
+        ylabel='Patterns overall'
+    )
+
+    plt.subplots_adjust(
+        left=.12, bottom=.13, right=.95,
+        top=.97, hspace=1, wspace=1
+    )
+    plt.show()
+
 if __name__ == "__main__":
     # Load dataset -----------------------------------------------
     data = pd.read_csv('BTC_XRP_5min.csv', index_col=0)
@@ -219,8 +280,10 @@ if __name__ == "__main__":
     ]
 
     # Examples ---------------------------------------------------
-    example_1(data=data, signals=signals)
+    # example_1(data=data, signals=signals)
 
-    example_2(data=data, signals=signals)
+    # example_2(data=data, signals=signals)
 
-    example_3(data=data.head(20), cs_patterns=patterns)
+    # example_3(data=data.head(20), cs_patterns=patterns)
+
+    example_4(data=data.head(100))

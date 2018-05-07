@@ -1,15 +1,17 @@
 # mpl_finance_ext
 
 mpl_finance_ext provides functions to plot and evaluate finance data. 
-It supports mainly three functions:
+It supports mainly fife functions:
 
 * Candlestick chart -- `plot_candlestick()`
 * Filled OHLC chart  -- `plot_filled_ohlc()`
 * Plot other stuff -- `plot()`
+* Plot histogram from dict -- `hist_from_dict()`
+* Plot bar chart from dict -- `bars_from_dict()`
 
-For every function signal evaluation is possible. That means when you have buy and sell signals
-provided by an algotrading algorithm for example you can plot them in the graph to get a visal 
-picture (same for candlestick patterns).
+For `plot_candlestick()` and `plot_filled_ohlc()` signal evaluation is possible. 
+That means when you have buy and sell signals provided by an algotrading algorithm 
+for example you can plot them in the graph to get a visal picture (same for candlestick patterns).
 The yield of buy and sell will be calculated and is shown in the graph as well. All this will be shown in
 a few examples below. All following code is provided in `examples.py`.
 
@@ -178,3 +180,53 @@ Structure of the list: `[ ... ,['pattern_name', start_index, stop_index], ... ]`
 Result:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_04.png)
+
+Bar and histogram charts
+-
+
+As shown in example 4 in `examples.py` a histogram will be created with
+```
+mu, sigma = 100, 15
+x = mu + sigma * np.random.randn(10000)
+    
+mfe.hist_from_dict(
+    fig=fig,
+    axis=ax2,
+    data_dict=x,
+    bins=50,
+    density=1,
+    xlabel='Returns',
+    ylabel='Probability density'
+)
+```
+and a bar chart with 
+```
+pattern_history = [
+    'berish_hanging_man',
+    'bulish_hammer',
+    'berish_dark_cloud_cover',
+    'bulish_piercing_line',
+    'berish_dark_cloud_cover',
+    'berish_dark_cloud_cover',
+    'bulish_hammer',
+    'berish_hanging_man',
+    'bulish_hammer',
+    'bulish_morning_star',
+]
+
+mfe.bars_from_dict(
+    fig=fig,
+    axis=ax3,
+    data_dict=pattern_history,
+    xlabel='Amount',
+    ylabel='Patterns overall'
+)
+```
+Results:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_05.png)
+
+
+
+
+
