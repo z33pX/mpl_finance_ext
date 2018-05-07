@@ -46,7 +46,7 @@ def draw_pattern_evaluation(data_ohlc, axis, cs_patterns, **kwargs):
         elif 'burepa' in pattern[0] or 'bucopa' in pattern[0]:
             color = green
         else:
-            color = 'white'
+            color = '#535353'
 
         patch = patches.Rectangle(
                 (x, y), w, h,
@@ -55,7 +55,6 @@ def draw_pattern_evaluation(data_ohlc, axis, cs_patterns, **kwargs):
                 linewidth=1,
                 linestyle='dotted',
                 fill=False,
-                alpha=0.9
         )
 
         objects.append(patch)

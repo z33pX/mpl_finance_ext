@@ -122,8 +122,8 @@ def example_1(data, signals):
             'MA_36', 'EMA_8'
         ],
         draw_verticals=False,
-        signl_evaluation=True,
-        signl_evaluation_form='rectangle',
+        signal_evaluation=True,
+        signal_evaluation_form='rectangle',  # 'arrow_1'
         disable_x_ticks=True,
     )
 
@@ -166,8 +166,8 @@ def example_2(data, signals):
             'MA_36', 'EMA_8'
         ],
         draw_verticals=False,
-        signl_evaluation=True,
-        signl_evaluation_form='rectangle',
+        signal_evaluation=True,
+        signal_evaluation_form='rectangle',
         # save='BTC_XRP_5min_filled.png'
     )
 
