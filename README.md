@@ -1,6 +1,7 @@
 # mpl_finance_ext
 
 mpl_finance_ext provides functions to plot and evaluate finance data. 
+It is a tool for experimenting with algorithms for algotrading.
 It supports mainly five functions:
 
 * Candlestick chart -- `plot_candlestick()`
@@ -27,11 +28,8 @@ data = bollinger_bands(df=data, n=20, std=4)
 data = exponential_moving_average(df=data, n=8)
 data = moving_average(df=data, n=36)
 
-# Now we set some signals
-# Structure: [(signal, index, price), ... ].
-# Signal can be 'BUY' or 'SELL'
-
-# Some manually picked examples
+# Now we set some signals and patterns
+# Some manually picked signals
 signals = [
     ('BUY', 12, 0.69), ('SELL', 27, 0.7028),
     ('BUY', 56, 0.6563), ('SELL', 81, 0.6854),
@@ -39,7 +37,7 @@ signals = [
     ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
 ]
 
-# Some manually picked candlestick pattern
+# One manually picked candlestick pattern
 patterns = [
     ['inverted_hammer', 12, 13]
 ]
@@ -48,7 +46,7 @@ patterns = [
 Plot candlestick charts
 -
 After we prepared the data we create a figure and an axis and plot 
-the candlesticks plus some indicators in one chart and the rsi 
+the candlesticks plus some indicators on one axis and the rsi 
 on a seperate axis:
 
 ```
@@ -66,7 +64,7 @@ ax0 = plt.subplot2grid(
 # 1) Candlestick chart
 # 2) Bollinger Bands 20
 # 3) Moving Average 36
-# 4) Exponential Moving Average
+# 4) Exponential Moving Average 8
 _, _ = mfe.plot_candlestick(
     fig=fig,
     axis=ax0,
@@ -97,7 +95,7 @@ ax1 = plt.subplot2grid(
 # 1) RSI 14
 mfe.plot(
     data=data,
-    name='Chart 2',
+    name='RSI_14',
     plot_columns=['RSI_14'],
     axis=ax1,
     fig=fig,
@@ -112,7 +110,7 @@ The result looks like this:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_01.png)
 
-For further explanations for the parameters please look into the function description. 
+For further explanations for the parameters please look into the function descriptions. 
 
 
 Plot filled OHLC charts
@@ -143,7 +141,7 @@ Signal evaluation
 -
 
 As mentioned in earlier examples the signal evaluation can be activated
-by defining a list of signals and set the parameter `signals=signals` of
+by defining a list of signals and set parameter `signals=signals` of
 `plot_filled_ohlc()` or `plot_candlestick()`:
 
 ```
@@ -184,7 +182,7 @@ Result:
 Bar and histogram charts
 -
 
-As shown in example 4 in `examples.py` a histogram will be created with
+As shown in example 4 in `examples.py` a histogram will be created like
 ```
 mu, sigma = 100, 15
 x = mu + sigma * np.random.randn(10000)
@@ -199,7 +197,7 @@ mfe.hist_from_dict(
     ylabel='Probability density'
 )
 ```
-and a bar chart with 
+and a bar chart like 
 ```
 pattern_history = [
     'berish_hanging_man',

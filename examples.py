@@ -111,7 +111,7 @@ def example_1(data, signals):
     #    The functionality is the same
     # 2) Bollinger Bands 20
     # 3) Moving Average 36
-    # 4) Exponential Moving Average
+    # 4) Exponential Moving Average 8
     _, _ = mfe.plot_candlestick(
         fig=fig,
         axis=ax0,
@@ -189,16 +189,16 @@ def example_3(data, cs_patterns):
             'MA_36', 'EMA_8'
         ],
         draw_verticals=False,
-        # save='BTC_XRP_5min_filled.png'
+        # save='BTC_XRP_5min_candlestick.png'
     )
 
 
-def example_4(data):
+def example_4():
     fig, _ = plt.subplots(
         facecolor=mfe.background_color
     )
 
-    # Plot pattern with return histogram
+    # Plot returns in histogram
     ax2 = plt.subplot2grid(
         (8, 8), (0, 0),
         rowspan=4, colspan=8,
@@ -252,6 +252,7 @@ def example_4(data):
     )
     plt.show()
 
+
 if __name__ == "__main__":
     # Load dataset -----------------------------------------------
     data = pd.read_csv('BTC_XRP_5min.csv', index_col=0)
@@ -274,16 +275,16 @@ if __name__ == "__main__":
         ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
     ]
 
-    # Some manually picked candlestick pattern
+    # One manually picked candlestick pattern
     patterns = [
         ['inverted_hammer', 12, 13]
     ]
 
     # Examples ---------------------------------------------------
-    # example_1(data=data, signals=signals)
+    example_1(data=data, signals=signals)
 
-    # example_2(data=data, signals=signals)
+    example_2(data=data, signals=signals)
 
-    # example_3(data=data.head(20), cs_patterns=patterns)
+    example_3(data=data.head(20), cs_patterns=patterns)
 
-    example_4(data=data.head(100))
+    example_4()
