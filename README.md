@@ -1,7 +1,7 @@
 # mpl_finance_ext
 
 mpl_finance_ext provides functions to plot and evaluate finance data. 
-It supports mainly fife functions:
+It supports mainly five functions:
 
 * Candlestick chart -- `plot_candlestick()`
 * Filled OHLC chart  -- `plot_filled_ohlc()`
