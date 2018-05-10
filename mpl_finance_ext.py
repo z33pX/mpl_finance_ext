@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as mtrans
 import numpy as np
 import pandas as pd
-from matplotlib import colors as mcolors
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.patches import BoxStyle
 from six.moves import xrange, zip
@@ -27,12 +26,12 @@ BoxStyle._style_list["angled"] = AngledBoxStyle
 
 def _candlestick2_ohlc(
         ax, opens, highs, lows, closes,
-        width=4.0, colorup='k', colordown='r',
+        width=4.0, colorup=green, colordown=red,
         alpha=0.75, index_fix=True
 ):
-
-    colorup = mcolors.to_rgba(colorup, alpha)
-    colordown = mcolors.to_rgba(colordown, alpha)
+    # Functions not supported in macOS
+    # colorup = mcolors.to_rgba(colorup, alpha)
+    # colordown = mcolors.to_rgba(colordown, alpha)
     line_colors = list()
     poly_colors_up = list()
     poly_colors_down = list()
@@ -141,6 +140,21 @@ def _add_text_box(fig, axis, text, x_p, y_p):
 
 
 def _tail(fig, ax, kwa, data=None, plot_columns=None):
+
+    # Vertical span and lines:
+    vline = kwa.get('vline', None)
+    if vline is not None:
+        plot_vline(
+            axis=ax, index=vline
+        )
+
+    vspan = kwa.get('vspan', None)
+    if vspan is not None:
+        plot_vspan(
+            axis=ax, index=vspan
+        )
+
+    # Names, title, labels
     name = kwa.get('name', None)
     if name is not None:
         ax.text(
@@ -161,16 +175,25 @@ def _tail(fig, ax, kwa, data=None, plot_columns=None):
         ax.set_title(title)
 
     # Plot columns
+    enable_flags = kwa.get('enable_flags', True)
+    if kwa.get('set_flags_at_the_end', True) \
+            and data is not None:
+        last_index = data.index.values[-1]
+    else:
+        last_index = None
+
     if plot_columns is not None and data is not None:
         for i, col in enumerate(plot_columns):
             series = data[col]
             ax.plot(series, linewidth=0.7,
                     color=color_set[i])
-            add_price_flag(
-                fig=fig, axis=ax,
-                series=data[col],
-                color=color_set[i]
-            )
+            if enable_flags:
+                add_price_flag(
+                    fig=fig, axis=ax,
+                    series=data[col],
+                    color=color_set[i],
+                    last_index=last_index
+                )
 
     xhline = kwa.get('xhline1', None)
     if xhline is not None:
@@ -217,12 +240,12 @@ def _tail(fig, ax, kwa, data=None, plot_columns=None):
     rotation = kwa.get('xtickrotation', 35)
     plt.setp(ax.get_xticklabels(), rotation=rotation)
     if kwa.get('disable_x_ticks', False):
+        # Deactivates labels always for all shared axes
         labels = [
             item.get_text()
             for item in ax.get_xticklabels()
         ]
-        empty_string_labels = [''] * len(labels)
-        ax.set_xticklabels(empty_string_labels)
+        ax.set_xticklabels([''] * len(labels))
 
     save = kwa.get('save', '')
     if save:
@@ -324,7 +347,6 @@ def fancy_design(axis, main_spine='left'):
         - ticks
         - grid
     :param axis: Axis
-    :param main_spine: Main spine
     """
     legend = axis.legend(
         loc='best', fancybox=True, framealpha=0.3
@@ -362,7 +384,7 @@ def fancy_design(axis, main_spine='left'):
     )
 
 
-def add_price_flag(fig, axis, series, color):
+def add_price_flag(fig, axis, series, color, last_index=None):
     """
     Add a price flag at the end of the data
     series in the chart
@@ -370,26 +392,42 @@ def add_price_flag(fig, axis, series, color):
     :param axis: Axis
     :param series: Pandas Series
     :param color: Color of the flag
+    :param last_index: Last index
     """
-    value = series.tail(1)
-    last_index = value.index.tolist()[0]
-    trans_offset = mtrans.offset_copy(
-        axis.transData, fig=fig,
-        x=0.05, y=0.0, units='inches'
-    )
 
-    # Add price text box for candlestick
-    value_clean = format(value.values[0], '.6f')
-    axis.text(
-        last_index, value.values, value_clean,
-        size=7, va="center", ha="left",
-        transform=trans_offset,
-        color='white',
-        bbox=dict(
-            boxstyle="angled,pad=0.2",
-            alpha=0.6, color=color
+    series = series.dropna()
+    value = series.tail(1)
+
+    try:
+        index = value.index.tolist()[0]
+        if last_index is not None:
+            axis.plot(
+                [index, last_index], [value.values[0], value.values[0]],
+                color=color, linewidth=0.6, linestyle='--', alpha=0.6
+            )
+        else:
+            last_index = index
+
+        trans_offset = mtrans.offset_copy(
+            axis.transData, fig=fig,
+            x=0.05, y=0.0, units='inches'
         )
-    )
+
+        # Add price text box for candlestick
+        value_clean = format(value.values[0], '.6f')
+        axis.text(
+            last_index, value.values, value_clean,
+            size=7, va="center", ha="left",
+            transform=trans_offset,
+            color='white',
+            bbox=dict(
+                boxstyle="angled,pad=0.2",
+                alpha=0.6, color=color
+            )
+        )
+
+    except IndexError:
+        pass
 
 
 def plot_candlestick(
@@ -417,6 +455,8 @@ def plot_candlestick(
         'disable_green_signals': Disables red signals if True
         'cs_pattern_evaluation': plot candlestick pattern
         'dots': Plot dots at 'BUY' and 'SELL' points
+        'enable_flags': Enable flags
+        'set_flags_at_the_end': Set flags at the end of the chart
         'xhline1': Normal horizontal line 1
         'xhline2': Normal horizontal line 1
         'xhline_red': Red horizontal line
@@ -425,6 +465,8 @@ def plot_candlestick(
         'xhline_dashed2': Dashed horizontal line 2
         'xhline_dotted1': Dotted horizontal line 1
         'xhline_dotted2': Dotted horizontal line 2
+        'vline': Index of vline
+        'vspan': [start index, end index]
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': x label
@@ -485,6 +527,8 @@ def plot_filled_ohlc(
         'disable_green_signals': Disables red signals if True
         'cs_pattern_evaluation': plot candlestick pattern
         'dots': Plot dots at 'BUY' and 'SELL' points
+        'enable_flags': Enable flags
+        'set_flags_at_the_end': Set flags at the end of the chart
         'xhline1': Normal horizontal line 1
         'xhline2': Normal horizontal line 1
         'xhline_red': Red horizontal line
@@ -493,6 +537,8 @@ def plot_filled_ohlc(
         'xhline_dashed2': Dashed horizontal line 2
         'xhline_dotted1': Dotted horizontal line 1
         'xhline_dotted2': Dotted horizontal line 2
+        'vline': Index of vline
+        'vspan': [start index, end index]
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': x label
@@ -550,6 +596,8 @@ def plot(data, plot_columns, **kwargs):
         'axis': Axis. If axis is not given the chart will
             plt.plot automatically
         'name': Name of the chart
+        'enable_flags': Enable flags
+        'set_flags_at_the_end': Set flags at the end of the chart
         'xhline1': Normal horizontal line 1
         'xhline2': Normal horizontal line 1
         'xhline_red': Red horizontal line
@@ -558,6 +606,8 @@ def plot(data, plot_columns, **kwargs):
         'xhline_dashed2': Dashed horizontal line 2
         'xhline_dotted1': Dotted horizontal line 1
         'xhline_dotted2': Dotted horizontal line 2
+        'vline': Index of vline
+        'vspan': [start index, end index]
         'xlabel': x label
         'ylabel': x label
         'title': title
@@ -691,4 +741,34 @@ def hist_from_dict(data_dict, **kwargs):
         fig=fig,
         ax=ax,
         kwa=kwargs,
+    )
+
+
+def plot_vline(axis, index, linestyle='--', color=color_set[0]):
+    """
+    Plots a vertical line
+    :param axis: Axis
+    :param index: Index
+    :param linestyle: Can be '-', '--', '-.', ':'
+    :param color: Color
+    """
+    axis.axvline(
+        index, color=color,
+        linewidth=0.8, alpha=0.8, linestyle=linestyle
+    )
+
+
+def plot_vspan(axis, index, color=color_set[0], alpha=0.05):
+    """
+    Plots a vertical span
+    :param axis: Axis
+    :param index: [start index, end index]
+    :param color: Color
+    :param alpha: Alpha
+    :return:
+    """
+    axis.axvspan(
+        index[0], index[1],
+        facecolor=color,
+        alpha=alpha
     )
