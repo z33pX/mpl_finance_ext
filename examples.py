@@ -172,6 +172,7 @@ def example_2(data, signals):
         # save='BTC_XRP_5min_filled.png'
     )
 
+
 def example_3(data, cs_patterns):
     # Example 2)
     # Alternative to the first example we dont use
@@ -208,7 +209,7 @@ def example_4():
     mu, sigma = 100, 15
     x = mu + sigma * np.random.randn(10000)
 
-    mfe.hist_from_dict(
+    mfe.hist(
         fig=fig,
         axis=ax2,
         data_dict=x,
@@ -238,7 +239,7 @@ def example_4():
         'bulish_morning_star',
     ]
 
-    mfe.bars_from_dict(
+    mfe.bar(
         fig=fig,
         axis=ax3,
         data_dict=pattern_history,

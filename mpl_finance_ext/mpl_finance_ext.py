@@ -628,11 +628,11 @@ def plot(data, plot_columns, **kwargs):
     )
 
 
-def bars_from_dict(data_dict, **kwargs):
+def bar(data, **kwargs):
     """
     This function provides a simple way to plot a histogram
-    from a dict.
-    :param data_dict: Dictionary of the data
+    from a list.
+    :param data: List of the data
         Structure: {'key_1', count of key_1, ... }
     :param kwargs:
         'fig': Figure.
@@ -650,7 +650,7 @@ def bars_from_dict(data_dict, **kwargs):
     """
     # prepare data
     x = dict()
-    for candle in data_dict:
+    for candle in data:
         if candle in x:
             x[candle] += 1
         else:
@@ -681,12 +681,12 @@ def bars_from_dict(data_dict, **kwargs):
     )
 
 
-def hist_from_dict(data_dict, **kwargs):
+def hist(data, **kwargs):
     """
     This function provides a simple way to plot a histogram
-    from a dict.
-    :param data_dict: Dictionary of the data
-        Structure: {'key_1', count of key_1, ... }
+    from a list.
+    :param data: List of the data
+        Structure: ['key_1', count of key_1, ... ]
     :param kwargs:
         'fig': Figure.
         'axis': Axis. If axis is not given the chart will
@@ -711,7 +711,7 @@ def hist_from_dict(data_dict, **kwargs):
     bins = kwargs.get('bins', 10)
     density = kwargs.get('density', None)
     ax.hist(
-        data_dict, bins, density=density,
+        data, bins, density=density,
         facecolor=green, alpha=0.75,
         align='mid', histtype='bar',
         rwidth=0.9
@@ -722,7 +722,7 @@ def hist_from_dict(data_dict, **kwargs):
     if threshold is not None:
         count_pos = 0
         count_neg = 0
-        for da in data_dict:
+        for da in data:
             if da > 0:
                 count_pos += 1
             else:

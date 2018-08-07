@@ -187,7 +187,7 @@ As shown in example 4 in `examples.py` a histogram will be created like
 mu, sigma = 100, 15
 x = mu + sigma * np.random.randn(10000)
     
-mfe.hist_from_dict(
+mfe.hist(
     fig=fig,
     axis=ax2,
     data_dict=x,
@@ -212,7 +212,7 @@ pattern_history = [
     'bulish_morning_star',
 ]
 
-mfe.bars_from_dict(
+mfe.bar(
     fig=fig,
     axis=ax3,
     data_dict=pattern_history,
