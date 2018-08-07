@@ -78,7 +78,8 @@ _, _ = mfe.plot_candlestick(
     draw_verticals=False,
     draw_evaluation=True,
     evaluation='rectangle',
-    disable_x_ticks=True,
+    disable_x_ticks=True
+)
 ```
 
 Now we plot the RSI_14 data on a separate axis with the `plot()` function:
