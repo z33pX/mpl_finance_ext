@@ -620,7 +620,6 @@ def plot(data, plot_columns, **kwargs):
     :return: fig, ax
     """
     if plot_columns is None:
-        print(data)
         data = pd.DataFrame.from_dict({'Series': data})
         plot_columns = ['Series']
 
