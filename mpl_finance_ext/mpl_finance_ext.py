@@ -590,7 +590,9 @@ def plot(data, plot_columns, **kwargs):
     This function provides a simple way to plot time series
     for example data['close'].
     :param data: Pandas DataFrame object
-    :param plot_columns: Name of the columns to plot
+    :param plot_columns: Name of the columns to plot.
+        If plot_columns is set to None the function accepts
+        a list instead of a DataFrame
     :param kwargs:
         'fig': Figure.
         'axis': Axis. If axis is not given the chart will
@@ -617,6 +619,11 @@ def plot(data, plot_columns, **kwargs):
             save='path_to_picture.png'
     :return: fig, ax
     """
+    if plot_columns is None:
+        print(data)
+        data = pd.DataFrame.from_dict({'Series': data})
+        plot_columns = ['Series']
+
     fig, ax = _head(kwargs=kwargs, data=data)
 
     return _tail(
