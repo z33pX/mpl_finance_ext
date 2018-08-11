@@ -212,7 +212,7 @@ def example_4():
     mfe.hist(
         fig=fig,
         axis=ax2,
-        data_dict=x,
+        data=x,
         bins=50,
         density=1,
         xlabel='Returns',
@@ -242,7 +242,7 @@ def example_4():
     mfe.bar(
         fig=fig,
         axis=ax3,
-        data_dict=pattern_history,
+        data=pattern_history,
         xlabel='Amount',
         ylabel='Patterns overall'
     )
@@ -252,6 +252,32 @@ def example_4():
         top=.97, hspace=1, wspace=1
     )
     plt.show()
+
+
+def example_5():
+
+    data = list()
+    class_conditions = list()
+    samples = 30
+
+    # Create some data
+    for i in range(samples):
+        data.append((i, i, i))
+        if i < samples / 2:
+            class_conditions.append(1)
+        else:
+            class_conditions.append(2)
+
+    # Graph everything
+    mfe.scatter_3d(
+        data=data,
+        class_conditions=class_conditions,
+        threshold=1,
+        show=True,
+        xlabel='X',
+        ylabel='Y',
+        zlabel='Z'
+    )
 
 
 if __name__ == "__main__":
@@ -282,10 +308,12 @@ if __name__ == "__main__":
     ]
 
     # Examples ---------------------------------------------------
-    example_1(data=data, signals=signals)
+    # example_1(data=data, signals=signals)
 
-    example_2(data=data, signals=signals)
+    # example_2(data=data, signals=signals)
 
-    example_3(data=data.head(20), cs_patterns=patterns)
+    # example_3(data=data.head(20), cs_patterns=patterns)
 
-    example_4()
+    # example_4()
+
+    example_5()

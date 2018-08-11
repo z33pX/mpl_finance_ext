@@ -225,7 +225,41 @@ Results:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_05.png)
 
+3D Scatter
+-
 
+- `data`: The data structure is a list of tripls like `[(x, y, z), (x, y, z)]`.
+- `threshold`: Defines the threshold of the classification.
+- `class_conditions`: This list contains the class values of the triples. If the value is less than the
+threshold value it is considered class a otherwise class b. The list must have the same length as the data list.
 
+Example:
+```
+data = list()
+class_conditions = list()
+samples = 30
+
+# Create some data
+for i in range(samples):
+    data.append((i, i, i))
+    if i < samples / 2:
+        class_conditions.append(1)
+    else:
+        class_conditions.append(2)
+
+# Graph everything
+mfe.scatter_3d(
+    data=data,
+    class_conditions=class_conditions,
+    threshold=1,
+    show=True,
+    xlabel='X',
+    ylabel='Y',
+    zlabel='Z'
+)
+```
+Result:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_06.png)
 
 

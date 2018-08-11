@@ -4,6 +4,7 @@ from .mpl_finance_ext import bar
 from .mpl_finance_ext import fancy_design
 from .mpl_finance_ext import green
 from .mpl_finance_ext import hist
+from .mpl_finance_ext import scatter_3d
 from .mpl_finance_ext import label_colors
 from .mpl_finance_ext import plot
 from .mpl_finance_ext import plot_candlestick
