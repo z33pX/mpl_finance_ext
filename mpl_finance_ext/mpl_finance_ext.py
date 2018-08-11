@@ -5,6 +5,7 @@ import pandas as pd
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.patches import BoxStyle
 from six.moves import xrange, zip
+from mpl_toolkits.mplot3d import Axes3D
 
 from .angled_box_style import AngledBoxStyle
 from .candlestick_pattern_evaluation import draw_pattern_evaluation
@@ -13,6 +14,7 @@ from .signal_evaluation import draw_verticals
 
 import logging
 logging.getLogger("matplotlib.legend").setLevel(logging.ERROR)
+logging.getLogger("matplotlib.backends._backend_tk").setLevel(logging.ERROR)
 
 # Colors:
 label_colors = '#c1c1c1'
@@ -158,26 +160,36 @@ def _vspan(kwa, ax):
         )
 
 
+def set_axis_label(axis, x=None, y=None, z=None, title=None):
+    # Set label
+    if x is not None:
+        axis.set_xlabel(x)
+    if y is not None:
+        axis.set_ylabel(y)
+    if z is not None:
+        axis.set_zlabel(z)
+    if title is not None:
+        axis.set_title(title)
+
+
 def _decoration(kwa, ax, legend):
     # Names, title, labels
     name = kwa.get('name', None)
     if name is not None:
         ax.text(
-            0.5, 0.95, name, color=label_colors,
+            0.5, 0.95, s=name, color=label_colors,
             horizontalalignment='center',
             fontsize=10, transform=ax.transAxes,
             zorder=120
         )
 
-    xlabel = kwa.get('xlabel', None)
-    if xlabel is not None:
-        ax.set_xlabel(xlabel)
-    ylabel = kwa.get('ylabel', None)
-    if ylabel is not None:
-        ax.set_ylabel(ylabel)
-    title = kwa.get('title', None)
-    if title is not None:
-        ax.set_title(title)
+    set_axis_label(
+        axis=ax,
+        x=kwa.get('xlabel', None),
+        y=kwa.get('ylabel', None),
+        z=kwa.get('ylabel', None),
+        title=kwa.get('title', None)
+    )
 
     main_spine = kwa.get('main_spine', 'left')
     fancy_design(ax, legend, main_spine=main_spine)
@@ -299,7 +311,7 @@ def _head(kwargs, data=None, convert_to_numeric=True):
     return fig, ax
 
 
-def _scatter(fig, ax, kwa, legend=True, data=None, plot_columns=None):
+def _scatter(fig, ax, kwa, legend=True, data=None):
 
     _vspan(kwa, ax)
     _decoration(kwa, ax, legend)
@@ -509,10 +521,10 @@ def plot_candlestick(
         'vspan': [start index, end index]
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
-        'ylabel': x label
+        'ylabel': y label
         'title': title
         'disable_x_ticks': Disables the x ticks
-        'show': If true the chart will be plt.show'd
+        'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
@@ -581,10 +593,10 @@ def plot_filled_ohlc(
         'vspan': [start index, end index]
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
-        'ylabel': x label
+        'ylabel': y label
         'title': title
         'disable_x_ticks': Disables the x ticks
-        'show': If true the chart will be plt.show'd
+        'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
@@ -646,10 +658,10 @@ def scatter(data, **kwargs):
             'vline': Index of vline
             'vspan': [start index, end index]
             'xlabel': x label
-            'ylabel': x label
+            'ylabel': y label
             'title': title
             'disable_x_ticks': Disables the x ticks
-            'show': If true the chart will be plt.show'd
+            'show': If true the chart will be plt.show()
             'save': Save the image to a specified path like
                 save='path_to_picture.png'
         :return: fig, ax
@@ -664,6 +676,65 @@ def scatter(data, **kwargs):
         kwa=kwargs,
         data=data,
     )
+
+
+def scatter_3d(data, class_conditions, threshold=0, **kwargs):
+    """
+        This function provides a simple way to scatter data
+        :param data: List of tripel
+        :param class_conditions:
+            IMPORTANT: List of numerical values with length
+            of the list of data
+            This list contains a value for each
+            triple that classifies it. If the value in the
+            list is greater than the parameter threshold the
+            dot will be painted in grey (color can be changed
+            by setting color_greater_th). If the value is less
+            than threshold the dot will be the accent color
+            of this library (can be set with color_less_th)
+        :param threshold: Threshold of the classification
+        :param kwargs:
+            'color_less_th': Color of the dots if the value
+                in the color_conditions list is less than
+                the parameter threshold
+            'color_greater_th': Color of the dots if the value
+                in the color_conditions list is greater than
+                the parameter threshold
+            'xlabel': x label
+            'ylabel': y label
+            'zlabel': z label
+            'title': title
+            'show': If true the chart will be plt.show()
+        :return: None
+        """
+
+    if len(data) != len(class_conditions):
+        raise ValueError('Lists of data and color_conditions ' +
+                         'have not the same length')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    color_below_th = kwargs.get('color_less_th', label_colors)
+    color_over_th = kwargs.get('color_greater_th', accent_color)
+
+    if len(data) > 1:
+        for i, point in enumerate(data):
+            if class_conditions[i] > threshold:
+                ax.scatter(point[0], point[1], point[2], color=color_over_th)
+            else:
+                ax.scatter(point[0], point[1], point[2], color=color_below_th)
+
+    set_axis_label(
+        axis=ax,
+        x=kwargs.get('xlabel', None),
+        y=kwargs.get('ylabel', None),
+        z=kwargs.get('zlabel', None),
+        title=kwargs.get('title', None)
+    )
+
+    if kwargs.get('show', False):
+        plt.show()
 
 
 def plot(data, plot_columns, **kwargs):
@@ -698,11 +769,11 @@ def plot(data, plot_columns, **kwargs):
         'vline': Index of vline
         'vspan': [start index, end index]
         'xlabel': x label
-        'ylabel': x label
+        'ylabel': y label
         'title': title
         'disable_x_ticks': Disables the x ticks
         'legend': If False legend is disabled
-        'show': If true the chart will be plt.show'd
+        'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
@@ -746,10 +817,10 @@ def bar(data, **kwargs):
             plt.plot automatically
         'name': Name of the chart
         'xlabel': x label
-        'ylabel': x label
+        'ylabel': y label
         'title': Title
         'disable_x_ticks': Disables the x ticks
-        'show': If true the chart will be plt.show'd
+        'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
@@ -802,10 +873,10 @@ def hist(data, **kwargs):
         'threshold': Threshold of the values
         'name': Name of the chart
         'xlabel': x label
-        'ylabel': x label
+        'ylabel': y label
         'title': Title
         'disable_x_ticks': Disables the x ticks
-        'show': If true the chart will be plt.show'd
+        'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
