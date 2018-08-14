@@ -2,13 +2,15 @@
 
 mpl_finance_ext provides functions to plot and evaluate finance data. 
 It is a tool for experimenting with algorithms for algotrading.
-It supports mainly five functions:
+It supports mainly these functions:
 
 * Candlestick chart -- `plot_candlestick()`
 * Filled OHLC chart  -- `plot_filled_ohlc()`
 * Plot other stuff -- `plot()`
-* Plot histogram from dict -- `hist_from_dict()`
-* Plot bar chart from dict -- `bars_from_dict()`
+* Plot histogram -- `hist()`
+* Plot bar chart -- `bars()`
+* Scatter plot -- `scatter()`
+* 3D scatter plot -- `scatter_3d()`
 
 For `plot_candlestick()` and `plot_filled_ohlc()` signal evaluation is possible. 
 That means when you have buy and sell signals provided by an algotrading algorithm 
