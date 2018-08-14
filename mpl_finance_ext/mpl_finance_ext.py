@@ -558,7 +558,7 @@ def plot_filled_ohlc(
         data, signals=None, cs_patterns=None,
         plot_columns=None, **kwargs):
     """
-    This function plots a filled ohlc chart
+    This function plots a filled ohlc line chart
     :param data: Pandas DataFrame
     :param signals: List of signals with structure
         [(signal, index, price), ... ]. Signal can be 'BUY'
@@ -639,11 +639,11 @@ def plot_filled_ohlc(
 
 def scatter(data, **kwargs):
     """
-        This function provides a simple way to scatter data
+        This function provides a simple way to plot scattered data
         :param data: List of tuples
         :param kwargs:
             'fig': Figure.
-            'axis': Axis. If axis is not given the chart will
+            'axis': If axis is not given the chart will
                 plt.plot automatically
             'name': Name of the chart
             'color': Color of the dots
@@ -680,9 +680,9 @@ def scatter(data, **kwargs):
 
 def scatter_3d(data, class_conditions=None, threshold=0, **kwargs):
     """
-        This function provides a simple way to scatter data
-        :param data: List of tripel. If None an 3D axis will
-            be returned. Then you can scatter stuff with
+        This function provides a simple way to plot scattered data
+        :param data: List of tripel. If None a 3D axis will
+            be returned. Then you can plot stuff with
             ax.scatter(x, y, z).
         :param class_conditions:
             IMPORTANT: List of numerical values with length
@@ -819,7 +819,7 @@ def plot(data, plot_columns, **kwargs):
 
 def bar(data, **kwargs):
     """
-    This function provides a simple way to plot a histogram
+    This function provides a simple way to plot a barchart
     from a list.
     :param data: List of the data
         Structure: {'key_1', count of key_1, ... }
@@ -935,7 +935,7 @@ def hist(data, **kwargs):
 
 def plot_vline(axis, index, linestyle='--', color=color_set[0]):
     """
-    Plots a vertical line
+    Plots one vertical line
     :param axis: Axis
     :param index: Index
     :param linestyle: Can be '-', '--', '-.', ':'
@@ -949,7 +949,7 @@ def plot_vline(axis, index, linestyle='--', color=color_set[0]):
 
 def plot_vspan(axis, index, color=color_set[0], alpha=0.05):
     """
-    Plots a vertical span
+    Plots one vertical span
     :param axis: Axis
     :param index: [start index, end index]
     :param color: Color
