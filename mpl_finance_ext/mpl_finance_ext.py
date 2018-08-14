@@ -187,6 +187,7 @@ def _decoration(kwa, ax, legend):
         axis=ax,
         x=kwa.get('xlabel', None),
         y=kwa.get('ylabel', None),
+        z=kwa.get('ylabel', None),
         title=kwa.get('title', None)
     )
 
@@ -677,13 +678,15 @@ def scatter(data, **kwargs):
     )
 
 
-def scatter_3d(data, class_conditions, threshold=0, **kwargs):
+def scatter_3d(data, class_conditions=None, threshold=0, **kwargs):
     """
         This function provides a simple way to scatter data
-        :param data: List of tripel
+        :param data: List of tripel. If None an 3D axis will
+            be returned. Then you can scatter stuff with
+            ax.scatter(x, y, z).
         :param class_conditions:
             IMPORTANT: List of numerical values with length
-            of the list of data
+            of the list of data.
             This list contains a value for each
             triple that classifies it. If the value in the
             list is greater than the parameter threshold the
@@ -699,6 +702,8 @@ def scatter_3d(data, class_conditions, threshold=0, **kwargs):
             'color_greater_th': Color of the dots if the value
                 in the color_conditions list is greater than
                 the parameter threshold
+            'color': If class_conditions is None the color of
+                the dots can be set by color.
             'xlabel': x label
             'ylabel': y label
             'zlabel': z label
@@ -706,23 +711,8 @@ def scatter_3d(data, class_conditions, threshold=0, **kwargs):
             'show': If true the chart will be plt.show()
         :return: None
         """
-
-    if len(data) != len(class_conditions):
-        raise ValueError('Lists of data and color_conditions ' +
-                         'have not the same length')
-
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
-    color_below_th = kwargs.get('color_less_th', label_colors)
-    color_over_th = kwargs.get('color_greater_th', accent_color)
-
-    if len(data) > 1:
-        for i, point in enumerate(data):
-            if class_conditions[i] > threshold:
-                ax.scatter(point[0], point[1], point[2], color=color_over_th)
-            else:
-                ax.scatter(point[0], point[1], point[2], color=color_below_th)
 
     set_axis_label(
         axis=ax,
@@ -731,6 +721,29 @@ def scatter_3d(data, class_conditions, threshold=0, **kwargs):
         z=kwargs.get('zlabel', None),
         title=kwargs.get('title', None)
     )
+
+    if data is None:
+        return ax
+
+    if class_conditions is None:
+        color = kwargs.get('color', label_colors)
+        for point in data:
+            ax.scatter(point[0], point[1], point[2], color=color)
+
+    else:
+        if len(data) != len(class_conditions):
+            raise ValueError('Lists of data and color_conditions ' +
+                             'have not the same length')
+
+        color_below_th = kwargs.get('color_less_th', label_colors)
+        color_over_th = kwargs.get('color_greater_th', accent_color)
+
+        if len(data) > 1:
+            for i, point in enumerate(data):
+                if class_conditions[i] > threshold:
+                    ax.scatter(point[0], point[1], point[2], color=color_over_th)
+                else:
+                    ax.scatter(point[0], point[1], point[2], color=color_below_th)
 
     if kwargs.get('show', False):
         plt.show()
