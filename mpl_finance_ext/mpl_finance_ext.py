@@ -187,7 +187,7 @@ def _decoration(kwa, ax, legend):
         axis=ax,
         x=kwa.get('xlabel', None),
         y=kwa.get('ylabel', None),
-        z=kwa.get('ylabel', None),
+        z=kwa.get('zlabel', None),
         title=kwa.get('title', None)
     )
 
