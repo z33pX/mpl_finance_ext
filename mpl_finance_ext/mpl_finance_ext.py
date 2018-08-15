@@ -288,7 +288,7 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
     return fig, ax
 
 
-def _head(kwargs, data=None, convert_to_numeric=True):
+def _head(kwargs, data=None, convert_to_numeric=False):
     # Prepare data ------------------------------------------
     if convert_to_numeric:
         if data is not None:
