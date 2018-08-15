@@ -22,6 +22,10 @@ def draw_verticals(axis, signals):
 
 
 def draw_signal_evaluation(axis, signals, **kwargs):
+
+    if not signals:
+        raise ValueError('The given list of signals is empty')
+
     signal_pairs = list()
 
     # Create list of BUY and SELL pairs --------------
