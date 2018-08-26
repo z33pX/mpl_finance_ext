@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtrans
 import numpy as np
@@ -288,13 +289,7 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
     return fig, ax
 
 
-def _head(kwargs, data=None, convert_to_numeric=False):
-    # Prepare data ------------------------------------------
-    if convert_to_numeric:
-        if data is not None:
-            for col in list(data):
-                data[col] = pd.to_numeric(
-                    data[col], errors='coerce')
+def _head(kwargs):
 
     # Build ax ----------------------------------------------
     fig = kwargs.get('fig', None)
@@ -529,7 +524,7 @@ def plot_candlestick(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs, data=data)
+    fig, ax = _head(kwargs=kwargs)
 
     # Add candlestick
     _candlestick2_ohlc(
@@ -601,7 +596,7 @@ def plot_filled_ohlc(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs, data=data)
+    fig, ax = _head(kwargs=kwargs)
 
     # Add filled_ohlc
     ax.fill_between(
@@ -667,7 +662,7 @@ def scatter(data, **kwargs):
         :return: fig, ax
         """
 
-    fig, ax = _head(kwargs=kwargs, data=data, convert_to_numeric=False)
+    fig, ax = _head(kwargs=kwargs)
 
     return _scatter(
         fig=fig,
@@ -805,7 +800,7 @@ def plot(data, plot_columns, **kwargs):
             data = pd.DataFrame.from_dict({'Series': data})
             plot_columns = ['Series']
 
-    fig, ax = _head(kwargs=kwargs, data=data)
+    fig, ax = _head(kwargs=kwargs)
 
     return _plot(
         fig=fig,

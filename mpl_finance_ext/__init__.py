@@ -1,3 +1,4 @@
+name = "mpl_finance_ext"
 from .mpl_finance_ext import add_price_flag
 from .mpl_finance_ext import background_color
 from .mpl_finance_ext import bar

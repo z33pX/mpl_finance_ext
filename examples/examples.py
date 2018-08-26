@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import mpl_finance_ext as mfe
 
@@ -308,12 +312,12 @@ if __name__ == "__main__":
     ]
 
     # Examples ---------------------------------------------------
-    # example_1(data=data, signals=signals)
+    example_1(data=data, signals=signals)
 
-    # example_2(data=data, signals=signals)
+    example_2(data=data, signals=signals)
 
-    # example_3(data=data.head(20), cs_patterns=patterns)
+    example_3(data=data.head(20), cs_patterns=patterns)
 
-    # example_4()
+    example_4()
 
     example_5()

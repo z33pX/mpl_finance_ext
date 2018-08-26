@@ -16,7 +16,7 @@ For `plot_candlestick()` and `plot_filled_ohlc()` signal evaluation is possible.
 That means when you have buy and sell signals provided by an algotrading algorithm 
 for example you can plot them in the graph to get a visal picture (same for candlestick patterns).
 The yield of buy and sell will be calculated and is shown in the graph as well. All this will be shown in
-a few examples below. All following code is provided in `examples.py`.
+a few examples below. All following code is provided in `examples/examples.py`.
 
 First we load the data and calculate some example indicators:
 
