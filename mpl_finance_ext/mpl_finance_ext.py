@@ -290,8 +290,11 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
 
 def _head(kwargs, data=None, convert_to_numeric=False):
     # Prepare data ------------------------------------------
-    if convert_to_numeric:
-        if data is not None:
+    if data is not None:
+        if data.empty:
+            raise ValueError('DataFrame is empty')
+
+        if convert_to_numeric:
             for col in list(data):
                 data[col] = pd.to_numeric(
                     data[col], errors='coerce')
