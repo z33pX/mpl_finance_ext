@@ -15,6 +15,7 @@ from .signal_evaluation import draw_verticals
 import logging
 logging.getLogger("matplotlib.legend").setLevel(logging.ERROR)
 logging.getLogger("matplotlib.backends._backend_tk").setLevel(logging.ERROR)
+logger = logging.getLogger('mpl_finance_ext')
 
 # Colors:
 label_colors = '#c1c1c1'
@@ -270,17 +271,22 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
         last_index = None
 
     if plot_columns is not None and data is not None:
+        avaiable_columns = list(data)
         for i, col in enumerate(plot_columns):
-            series = data[col]
-            ax.plot(series, linewidth=0.7,
-                    color=color_set[i])
-            if enable_flags:
-                add_price_flag(
-                    fig=fig, axis=ax,
-                    series=data[col],
-                    color=color_set[i],
-                    last_index=last_index
-                )
+            if col in avaiable_columns:
+                series = data[col]
+                ax.plot(series, linewidth=0.7,
+                        color=color_set[i])
+                if enable_flags:
+                    add_price_flag(
+                        fig=fig, axis=ax,
+                        series=data[col],
+                        color=color_set[i],
+                        last_index=last_index
+                    )
+            else:
+                logger.warning('Column ' + str(col) +
+                               ' not found in dataset')
 
     xhline(kwa, ax)
     _save_or_show(kwa, fig)
