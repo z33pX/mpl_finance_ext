@@ -297,6 +297,9 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
 def _head(kwargs, data=None, convert_to_numeric=False):
     # Prepare data ------------------------------------------
     if data is not None:
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError('Data must be a pandas DataFrame')
+        
         if data.empty:
             raise ValueError('DataFrame is empty')
 
