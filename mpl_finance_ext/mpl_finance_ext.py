@@ -371,7 +371,7 @@ def _signal_eval(ax, signals, kwargs):
                     'disable_green_signals', False)
             )
 
-
+        
 def _pattern_eval(data, ax, cs_patterns, kwargs):
     """
     Plots the candlestick patterns
@@ -381,7 +381,15 @@ def _pattern_eval(data, ax, cs_patterns, kwargs):
         [ ..., ['pattern_name', start_index,
             stop_index], ...]
     :param kwargs:
-        'cs_pattern_evaluation': Enable plotting
+        cs_pattern_evaluation: Enable plotting
+        bearish_filter: List of strings. If one of the
+            strings matches the string or sub string of
+            the pattern name the pattern will be visualised
+            in red.
+        bullish_filter: List of strings. If one of the
+            strings matches the string or sub string of
+            the pattern name the pattern will be visualised
+            in green.
     :return:
     """
     if cs_patterns is not None:
@@ -392,7 +400,9 @@ def _pattern_eval(data, ax, cs_patterns, kwargs):
                 data_ohlc=df,
                 cs_patterns=cs_patterns,
                 red=label_colors,
-                green=accent_color
+                green=accent_color,
+                bearish_filter=kwargs.get('bearish_filter', ['be']),
+                bullish_filter=kwargs.get('bullish_filter', ['bu']),
             )
 
 
