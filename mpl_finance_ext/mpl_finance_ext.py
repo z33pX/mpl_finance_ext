@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtrans
 import numpy as np
@@ -14,16 +13,18 @@ from .signal_evaluation import draw_signal_evaluation
 from .signal_evaluation import draw_verticals
 
 import logging
+
 logging.getLogger("matplotlib.legend").setLevel(logging.ERROR)
 logging.getLogger("matplotlib.backends._backend_tk").setLevel(logging.ERROR)
+logger = logging.getLogger('mpl_finance_ext')
 
 # Colors:
 label_colors = '#c1c1c1'
 accent_color = '#13bebc'
 background_color = '#ffffff'
 
-red = '#fe0000'     # '#fe0000'
-green = '#00fc01'   # '#13bebc'
+red = '#fe0000'  # '#fe0000'
+green = '#00fc01'  # '#13bebc'
 
 color_set = ['#13bebc', '#b0c113', '#c1139e', '#c17113', '#0d8382']
 
@@ -258,7 +259,6 @@ def _save_or_show(kwa, fig):
 
 
 def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
-
     _vspan(kwa, ax)
     _decoration(kwa, ax, legend)
 
@@ -271,17 +271,22 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
         last_index = None
 
     if plot_columns is not None and data is not None:
+        avaiable_columns = list(data)
         for i, col in enumerate(plot_columns):
-            series = data[col]
-            ax.plot(series, linewidth=0.7,
-                    color=color_set[i])
-            if enable_flags:
-                add_price_flag(
-                    fig=fig, axis=ax,
-                    series=data[col],
-                    color=color_set[i],
-                    last_index=last_index
-                )
+            if col in avaiable_columns:
+                series = data[col]
+                ax.plot(series, linewidth=0.7,
+                        color=color_set[i])
+                if enable_flags:
+                    add_price_flag(
+                        fig=fig, axis=ax,
+                        series=data[col],
+                        color=color_set[i],
+                        last_index=last_index
+                    )
+            else:
+                logger.warning('Column ' + str(col) +
+                               ' not found in dataset')
 
     xhline(kwa, ax)
     _save_or_show(kwa, fig)
@@ -289,7 +294,19 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
     return fig, ax
 
 
-def _head(kwargs):
+def _head(kwargs, data=None, convert_to_numeric=False):
+    # Prepare data ------------------------------------------
+    if data is not None:
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError('Data must be a pandas DataFrame')
+
+        if data.empty:
+            raise ValueError('DataFrame is empty')
+
+        if convert_to_numeric:
+            for col in list(data):
+                data[col] = pd.to_numeric(
+                    data[col], errors='coerce')
 
     # Build ax ----------------------------------------------
     fig = kwargs.get('fig', None)
@@ -307,7 +324,6 @@ def _head(kwargs):
 
 
 def _scatter(fig, ax, kwa, legend=True, data=None):
-
     _vspan(kwa, ax)
     _decoration(kwa, ax, legend)
 
@@ -367,7 +383,15 @@ def _pattern_eval(data, ax, cs_patterns, kwargs):
         [ ..., ['pattern_name', start_index,
             stop_index], ...]
     :param kwargs:
-        'cs_pattern_evaluation': Enable plotting
+        cs_pattern_evaluation: Enable plotting
+        bearish_filter: List of strings. If one of the
+            strings matches the string or sub string of
+            the pattern name the pattern will be visualised
+            in red.
+        bullish_filter: List of strings. If one of the
+            strings matches the string or sub string of
+            the pattern name the pattern will be visualised
+            in green.
     :return:
     """
     if cs_patterns is not None:
@@ -378,7 +402,9 @@ def _pattern_eval(data, ax, cs_patterns, kwargs):
                 data_ohlc=df,
                 cs_patterns=cs_patterns,
                 red=label_colors,
-                green=accent_color
+                green=accent_color,
+                bearish_filter=kwargs.get('bearish_filter', ['be']),
+                bullish_filter=kwargs.get('bullish_filter', ['bu']),
             )
 
 
@@ -524,7 +550,7 @@ def plot_candlestick(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs)
+    fig, ax = _head(kwargs=kwargs, data=data)
 
     # Add candlestick
     _candlestick2_ohlc(
@@ -596,7 +622,7 @@ def plot_filled_ohlc(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs)
+    fig, ax = _head(kwargs=kwargs, data=data)
 
     # Add filled_ohlc
     ax.fill_between(
@@ -662,7 +688,7 @@ def scatter(data, **kwargs):
         :return: fig, ax
         """
 
-    fig, ax = _head(kwargs=kwargs)
+    fig, ax = _head(kwargs=kwargs, data=data, convert_to_numeric=False)
 
     return _scatter(
         fig=fig,
@@ -800,7 +826,7 @@ def plot(data, plot_columns, **kwargs):
             data = pd.DataFrame.from_dict({'Series': data})
             plot_columns = ['Series']
 
-    fig, ax = _head(kwargs=kwargs)
+    fig, ax = _head(kwargs=kwargs, data=data)
 
     return _plot(
         fig=fig,
