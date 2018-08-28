@@ -308,12 +308,12 @@ if __name__ == "__main__":
     ]
 
     # Examples ---------------------------------------------------
-    # example_1(data=data, signals=signals)
+    example_1(data=data, signals=signals)
 
-    # example_2(data=data, signals=signals)
+    example_2(data=data, signals=signals)
 
-    # example_3(data=data.head(20), cs_patterns=patterns)
+    example_3(data=data.head(20), cs_patterns=patterns)
 
-    # example_4()
+    example_4()
 
     example_5()
