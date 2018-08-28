@@ -49,6 +49,7 @@ def _candlestick2_ohlc(
     poly_segments_up = list()
     poly_segments_down = list()
     line_segments = list()
+
     for i, open, close, high, low in zip(
             xrange(len(opens)), opens, closes, highs, lows):
         if index_fix:
