@@ -261,7 +261,6 @@ def example_4():
 
 def example_5():
     df = pd.read_csv('stocks.csv', index_col=0).tail(1000)
-
     mfe.plot(df / df.iloc[0], gradient_fill=True)
 
 
