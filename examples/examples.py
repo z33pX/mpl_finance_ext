@@ -260,6 +260,12 @@ def example_4():
 
 
 def example_5():
+    df = pd.read_csv('stocks.csv', index_col=0).tail(1000)
+
+    mfe.plot(df / df.iloc[0], gradient_fill=True)
+
+
+def example_6():
 
     data = list()
     class_conditions = list()
@@ -322,3 +328,5 @@ if __name__ == "__main__":
     example_4()
 
     example_5()
+
+    example_6()

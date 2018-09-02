@@ -196,6 +196,7 @@ def _vspan(kwa, ax):
 
 
 def set_axis_label(axis, x=None, y=None, z=None, title=None):
+
     # Set label
     if x is not None:
         axis.set_xlabel(x)
@@ -209,6 +210,8 @@ def set_axis_label(axis, x=None, y=None, z=None, title=None):
 
 def _decoration(kwa, ax, legend):
     # Names, title, labels
+    ax.locator_params(axis='x', tight=False)
+
     name = kwa.get('name', None)
     if name is not None:
         ax.text(
@@ -228,8 +231,10 @@ def _decoration(kwa, ax, legend):
 
     main_spine = kwa.get('main_spine', 'left')
     fancy_design(ax, legend, main_spine=main_spine)
+
     rotation = kwa.get('xtickrotation', 35)
     plt.setp(ax.get_xticklabels(), rotation=rotation)
+
     if kwa.get('disable_x_ticks', False):
         # Deactivates labels always for all shared axes
         labels = [
@@ -237,6 +242,8 @@ def _decoration(kwa, ax, legend):
             for item in ax.get_xticklabels()
         ]
         ax.set_xticklabels([''] * len(labels))
+
+    # ax.autoscale(True)
 
 
 def xhline(kwa, ax):
@@ -251,14 +258,14 @@ def xhline(kwa, ax):
         ax.axhline(xhline_green, color=green,
                    linewidth=0.5)
 
-    xhline = kwa.get('xhline', None)
+    xhlines = kwa.get('xhline', None)
 
-    if xhline is not None:
+    if xhlines is not None:
         linewidth = 0.5
         linestyle = None
         color = accent_color
 
-        for line in xhline:
+        for line in xhlines:
 
             if 'color' in line:
                 color = line['color']
@@ -306,8 +313,8 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
         avaiable_columns = list(data)
         for i, col in enumerate(plot_columns):
             if col in avaiable_columns:
-                series = data[col]
                 color = color_set[i % len(color_set)]
+                series = data[col]
 
                 line, = ax.plot(series, linewidth=0.7, color=color)
 
@@ -336,7 +343,6 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
                     clip_path = Polygon(xy, facecolor='none', edgecolor='none', closed=True)
                     ax.add_patch(clip_path)
                     im.set_clip_path(clip_path)
-                    ax.autoscale(True)
 
                 if enable_flags:
                     add_price_flag(
@@ -359,9 +365,10 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
 
 def _head(kwargs, data=None, convert_to_numeric=False):
 
-    if kwargs.get('reset_index', False):
+    if kwargs.get('reset_index', False) or kwargs.get('gradient_fill', False):
         data = data.reset_index()
-        data.drop(['Date'], axis=1, inplace=True)
+        if 'Date' in list(data):
+            data.drop(['Date'], axis=1, inplace=True)
 
     # Prepare data ------------------------------------------
     if data is not None:
@@ -388,7 +395,7 @@ def _head(kwargs, data=None, convert_to_numeric=False):
             rowspan=4, colspan=4,
             facecolor=background_color
         )
-    return fig, ax
+    return data, fig, ax
 
 
 def _scatter(fig, ax, kwa, legend=True, data=None):
@@ -500,16 +507,18 @@ def fancy_design(axis, legend=True, main_spine='left'):
                               legend.get_texts()):
             text.set_color(line.get_color())
 
-    axis.grid(linestyle='dotted',
-              color=label_colors, alpha=0.7)
+    axis.grid(linestyle='dotted', color=label_colors, alpha=0.7, animated=True)
+
     axis.yaxis.label.set_color(label_colors)
     axis.xaxis.label.set_color(label_colors)
     axis.yaxis.label.set_color(label_colors)
+
     for spine in axis.spines:
         if spine == main_spine:
             axis.spines[spine].set_color(label_colors)
         else:
             axis.spines[spine].set_color(background_color)
+
     axis.tick_params(
         axis='y', colors=label_colors,
         which='major', labelsize=10,
@@ -644,7 +653,7 @@ def plot_candlestick(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs, data=data)
+    data, fig, ax = _head(kwargs=kwargs, data=data)
 
     # Add candlestick
     _candlestick2_ohlc(
@@ -739,7 +748,7 @@ def plot_filled_ohlc(
             save='path_to_picture.png'
     :return: fig, ax
     """
-    fig, ax = _head(kwargs=kwargs, data=data)
+    data, fig, ax = _head(kwargs=kwargs, data=data)
 
     # Add filled_ohlc
     ax.fill_between(
@@ -828,7 +837,7 @@ def scatter(data, **kwargs):
     :return: fig, ax
     """
 
-    fig, ax = _head(kwargs=kwargs, data=data, convert_to_numeric=False)
+    data, fig, ax = _head(kwargs=kwargs, data=data, convert_to_numeric=False)
 
     return _scatter(
         fig=fig,
@@ -969,7 +978,7 @@ def plot(data, plot_columns=None, **kwargs):
     :return: fig, ax
     """
 
-    fig, ax = _head(kwargs=kwargs, data=data)
+    data, fig, ax = _head(kwargs=kwargs, data=data)
 
     return _plot(
         fig=fig,
@@ -1016,7 +1025,7 @@ def bar(data, **kwargs):
         performance.append(x[key])
 
     # Generate chart
-    fig, ax = _head(kwargs=kwargs)
+    _, fig, ax = _head(kwargs=kwargs)
 
     # Plot histogram
     ax.barh(
@@ -1058,7 +1067,7 @@ def hist(data, **kwargs):
     :return: fig, ax
     """
     # Generate chart
-    fig, ax = _head(kwargs=kwargs)
+    _, fig, ax = _head(kwargs=kwargs)
 
     # Plot histogram
     bins = kwargs.get('bins', 10)

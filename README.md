@@ -228,6 +228,21 @@ Results:
 
 ![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_05.png)
 
+Plot
+-
+
+in this example we plot some stock data in two lines:
+
+```
+    df = pd.read_csv('stocks.csv', index_col=0).tail(1000)
+    mfe.plot(df / df.iloc[0], gradient_fill=True)
+```
+
+Result:
+
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_07.png)
+
+
 3D Scatter
 -
 
