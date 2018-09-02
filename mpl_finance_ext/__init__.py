@@ -1,4 +1,12 @@
 name = "mpl_finance_ext"
+
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+
+import logging
+logging.getLogger("matplotlib.legend").setLevel(logging.ERROR)
+logging.getLogger("matplotlib.backends._backend_tk").setLevel(logging.ERROR)
+
 from .mpl_finance_ext import add_price_flag
 from .mpl_finance_ext import background_color
 from .mpl_finance_ext import bar

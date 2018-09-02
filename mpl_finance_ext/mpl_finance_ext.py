@@ -13,9 +13,6 @@ from .signal_evaluation import draw_signal_evaluation
 from .signal_evaluation import draw_verticals
 
 import logging
-
-logging.getLogger("matplotlib.legend").setLevel(logging.ERROR)
-logging.getLogger("matplotlib.backends._backend_tk").setLevel(logging.ERROR)
 logger = logging.getLogger('mpl_finance_ext')
 
 # Colors:
@@ -150,17 +147,50 @@ def _add_text_box(fig, axis, text, x_p, y_p):
 
 def _vspan(kwa, ax):
     # Vertical span and lines:
-    vline = kwa.get('vline', None)
-    if vline is not None:
-        plot_vline(
-            axis=ax, index=vline
-        )
+    vlines = kwa.get('vline', None)
+    if vlines is not None:
+        linestyle = '--'
+        color = color_set[0]
+        linewidth = 0.8
+        alpha = 0.8
+        for vline in vlines:
 
-    vspan = kwa.get('vspan', None)
-    if vspan is not None:
-        plot_vspan(
-            axis=ax, index=vspan
-        )
+            if 'color' in vline:
+                color = vline['color']
+
+            if 'linewidth' in vline:
+                linewidth = vline['linewidth']
+
+            if 'linestyle' in vline:
+                linestyle = vline['linestyle']
+
+            if 'alpha' in vline:
+                alpha = vline['alpha']
+
+            plot_vline(
+                axis=ax, index=vline['ix'],
+                linestyle=linestyle,
+                color=color, linewidth=linewidth,
+                alpha=alpha
+            )
+
+    vspans = kwa.get('vspan', None)
+
+    if vspans is not None:
+        color = color_set[0]
+        alpha = 0.2
+        for vspan in vspans:
+
+            if 'color' in vspan:
+                color = vspan['color']
+
+            if 'alpha' in vspan:
+                alpha = vspan['alpha']
+
+            plot_vspan(
+                axis=ax, index=vspan['ix'],
+                color=color, alpha=alpha
+            )
 
 
 def set_axis_label(axis, x=None, y=None, z=None, title=None):
@@ -208,15 +238,6 @@ def _decoration(kwa, ax, legend):
 
 
 def xhline(kwa, ax):
-    _xhline = kwa.get('xhline1', None)
-    if _xhline is not None:
-        ax.axhline(_xhline, color=label_colors,
-                   linewidth=0.5)
-
-    xhline2 = kwa.get('xhline2', None)
-    if xhline2 is not None:
-        ax.axhline(xhline2, color=label_colors,
-                   linewidth=0.5)
 
     xhline_red = kwa.get('xhline_red', None)
     if xhline_red is not None:
@@ -228,25 +249,30 @@ def xhline(kwa, ax):
         ax.axhline(xhline_green, color=green,
                    linewidth=0.5)
 
-    xhline_dashed_1 = kwa.get('xhline_dashed1', None)
-    if xhline_dashed_1 is not None:
-        ax.axhline(xhline_dashed_1, color=label_colors,
-                   linewidth=0.6, linestyle='--')
+    xhline = kwa.get('xhline', None)
 
-    xhline_dashed_2 = kwa.get('xhline_dashed2', None)
-    if xhline_dashed_2 is not None:
-        ax.axhline(xhline_dashed_2, color=label_colors,
-                   linewidth=0.6, linestyle='--')
+    if xhline is not None:
+        linewidth = 0.5
+        linestyle = None
+        color = accent_color
 
-    xhline_dotted_1 = kwa.get('xhline_dotted1', None)
-    if xhline_dotted_1 is not None:
-        ax.axhline(xhline_dotted_1, color=label_colors,
-                   linewidth=0.9, linestyle=':')
+        for line in xhline:
 
-    xhline_dotted_2 = kwa.get('xhline_dotted2', None)
-    if xhline_dotted_2 is not None:
-        ax.axhline(xhline_dotted_2, color=label_colors,
-                   linewidth=0.9, linestyle=':')
+            if 'color' in line:
+                color = line['color']
+
+            if 'linewidth' in line:
+                linewidth = line['linewidth']
+
+            if 'linestyle' in line:
+                linestyle = line['linestyle']
+
+            ax.axhline(
+                line['ix'],
+                color=color,
+                linewidth=linewidth,
+                linestyle=linestyle
+            )
 
 
 def _save_or_show(kwa, fig):
@@ -260,8 +286,9 @@ def _save_or_show(kwa, fig):
 
 
 def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
-    _vspan(kwa, ax)
-    _decoration(kwa, ax, legend)
+
+    if plot_columns is None and data is not None:
+        plot_columns = list(data)
 
     # Plot columns
     enable_flags = kwa.get('enable_flags', True)
@@ -276,19 +303,23 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
         for i, col in enumerate(plot_columns):
             if col in avaiable_columns:
                 series = data[col]
+                color = color_set[i % len(color_set)]
+
                 ax.plot(series, linewidth=0.7,
-                        color=color_set[i])
+                        color=color)
                 if enable_flags:
                     add_price_flag(
                         fig=fig, axis=ax,
                         series=data[col],
-                        color=color_set[i],
+                        color=color,
                         last_index=last_index
                     )
             else:
                 logger.warning('Column ' + str(col) +
                                ' not found in dataset')
 
+    _decoration(kwa, ax, legend)
+    _vspan(kwa, ax)
     xhline(kwa, ax)
     _save_or_show(kwa, fig)
 
@@ -296,6 +327,11 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
 
 
 def _head(kwargs, data=None, convert_to_numeric=False):
+
+    if kwargs.get('reset_index', False):
+        data = data.reset_index()
+        data.drop(['Date'], axis=1, inplace=True)
+
     # Prepare data ------------------------------------------
     if data is not None:
         if not isinstance(data, pd.DataFrame):
@@ -488,9 +524,12 @@ def add_price_flag(fig, axis, series, color, last_index=None):
         )
 
         # Add price text box for candlestick
-        value_clean = format(value.values[0], '.6f')
+        x = value.values[0]
+        if isinstance(x, float):
+            x = format(x, '.6f')
+
         axis.text(
-            last_index, value.values, value_clean,
+            last_index, value.values, x,
             size=7, va="center", ha="left",
             transform=trans_offset,
             color='white',
@@ -531,16 +570,38 @@ def plot_candlestick(
         'dots': Plot dots at 'BUY' and 'SELL' points
         'enable_flags': Enable flags
         'set_flags_at_the_end': Set flags at the end of the chart
-        'xhline1': Normal horizontal line 1
-        'xhline2': Normal horizontal line 1
+        'xhline': list of dictionaries like:
+            xhline= [
+                {'ix': 0.1, 'color': 'red'},
+                {'ix': -0.1, 'linestyle': '--'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
         'xhline_red': Red horizontal line
         'xhline_green': Green horizontal line
-        'xhline_dashed1': Dashed horizontal line 1
-        'xhline_dashed2': Dashed horizontal line 2
-        'xhline_dotted1': Dotted horizontal line 1
-        'xhline_dotted2': Dotted horizontal line 2
-        'vline': Index of vline
-        'vspan': [start index, end index]
+        'vline': List of dictionaries like:
+            [
+                {'ix': 1},
+                {'ix': 2, 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
+                alpha: Alpha
+        'vspan': List of dictionaries like:
+            [
+                {'ix': (1, 2)},
+                {'ix': (3, 4), 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                alpha: Alpha
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': y label
@@ -603,16 +664,38 @@ def plot_filled_ohlc(
         'dots': Plot dots at 'BUY' and 'SELL' points
         'enable_flags': Enable flags
         'set_flags_at_the_end': Set flags at the end of the chart
-        'xhline1': Normal horizontal line 1
-        'xhline2': Normal horizontal line 1
+        'xhline': list of dictionaries like:
+            xhline= [
+                {'ix': 0.1, 'color': 'red'},
+                {'ix': -0.1, 'linestyle': '--'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
         'xhline_red': Red horizontal line
         'xhline_green': Green horizontal line
-        'xhline_dashed1': Dashed horizontal line 1
-        'xhline_dashed2': Dashed horizontal line 2
-        'xhline_dotted1': Dotted horizontal line 1
-        'xhline_dotted2': Dotted horizontal line 2
-        'vline': Index of vline
-        'vspan': [start index, end index]
+        'vline': List of dictionaries like:
+            [
+                {'ix': 1},
+                {'ix': 2, 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
+                alpha: Alpha
+        'vspan': List of dictionaries like:
+            [
+                {'ix': (1, 2)},
+                {'ix': (3, 4), 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                alpha: Alpha
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': y label
@@ -661,33 +744,55 @@ def plot_filled_ohlc(
 
 def scatter(data, **kwargs):
     """
-        This function provides a simple way to plot scattered data
-        :param data: List of tuples
-        :param kwargs:
-            'fig': Figure.
-            'axis': If axis is not given the chart will
-                plt.plot automatically
-            'name': Name of the chart
-            'color': Color of the dots
-            'xhline1': Normal horizontal line 1
-            'xhline2': Normal horizontal line 1
-            'xhline_red': Red horizontal line
-            'xhline_green': Green horizontal line
-            'xhline_dashed1': Dashed horizontal line 1
-            'xhline_dashed2': Dashed horizontal line 2
-            'xhline_dotted1': Dotted horizontal line 1
-            'xhline_dotted2': Dotted horizontal line 2
-            'vline': Index of vline
-            'vspan': [start index, end index]
-            'xlabel': x label
-            'ylabel': y label
-            'title': title
-            'disable_x_ticks': Disables the x ticks
-            'show': If true the chart will be plt.show()
-            'save': Save the image to a specified path like
-                save='path_to_picture.png'
-        :return: fig, ax
-        """
+    This function provides a simple way to plot scattered data
+    :param data: List of tuples
+    :param kwargs:
+        'fig': Figure.
+        'axis': If axis is not given the chart will
+            plt.plot automatically
+        'name': Name of the chart
+        'color': Color of the dots
+        'xhline': list of dictionaries like:
+            xhline= [
+                {'ix': 0.1, 'color': 'red'},
+                {'ix': -0.1, 'linestyle': '--'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
+        'xhline_red': Red horizontal line
+        'xhline_green': Green horizontal line
+        'vline': List of dictionaries like:
+            [
+                {'ix': 1},
+                {'ix': 2, 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
+                alpha: Alpha
+        'vspan': List of dictionaries like:
+            [
+                {'ix': (1, 2)},
+                {'ix': (3, 4), 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                alpha: Alpha
+        'xlabel': x label
+        'ylabel': y label
+        'title': title
+        'disable_x_ticks': Disables the x ticks
+        'show': If true the chart will be plt.show()
+        'save': Save the image to a specified path like
+            save='path_to_picture.png'
+    :return: fig, ax
+    """
 
     fig, ax = _head(kwargs=kwargs, data=data, convert_to_numeric=False)
 
@@ -707,7 +812,7 @@ def scatter_3d(data, class_conditions=None, threshold=0, **kwargs):
             be returned. Then you can plot stuff with
             ax.scatter(x, y, z).
         :param class_conditions:
-            IMPORTANT: List of numerical values with length
+            IMPORTANT: Must be a list of numerical values with length
             of the list of data.
             This list contains a value for each
             triple that classifies it. If the value in the
@@ -771,20 +876,13 @@ def scatter_3d(data, class_conditions=None, threshold=0, **kwargs):
         plt.show()
 
 
-def plot(data, plot_columns, **kwargs):
+def plot(data, plot_columns=None, **kwargs):
     """
     This function provides a simple way to plot time series
     for example data['close'].
     :param data: Pandas DataFrame object
     :param plot_columns: Name of the columns to plot.
-        If plot_columns is set to None the function accepts
-        a list instead of a DataFrame. It supports lists in a
-        list too like:
-        [
-            [ ... ],
-            [ ... ],
-            ...
-        ]
+        If plot_columns is None all columns well be ploted
     :param kwargs:
         'fig': Figure.
         'axis': Axis. If axis is not given the chart will
@@ -792,40 +890,49 @@ def plot(data, plot_columns, **kwargs):
         'name': Name of the chart
         'enable_flags': Enable flags
         'set_flags_at_the_end': Set flags at the end of the chart
-        'xhline1': Normal horizontal line 1
-        'xhline2': Normal horizontal line 1
+        'xhline': list of dictionaries like:
+            xhline= [
+                {'ix': 0.1, 'color': 'red'},
+                {'ix': -0.1, 'linestyle': '--'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
         'xhline_red': Red horizontal line
         'xhline_green': Green horizontal line
-        'xhline_dashed1': Dashed horizontal line 1
-        'xhline_dashed2': Dashed horizontal line 2
-        'xhline_dotted1': Dotted horizontal line 1
-        'xhline_dotted2': Dotted horizontal line 2
-        'vline': Index of vline
-        'vspan': [start index, end index]
+        'vline': List of dictionaries like:
+            [
+                {'ix': 1},
+                {'ix': 2, 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                linewidth: Linewidth
+                linestyle: Linestyle
+                alpha: Alpha
+        'vspan': List of dictionaries like:
+            [
+                {'ix': (1, 2)},
+                {'ix': (3, 4), 'color': 'green'}
+            ]
+            Attributes:
+                ix: Index
+                color: Color
+                alpha: Alpha
         'xlabel': x label
         'ylabel': y label
         'title': title
         'disable_x_ticks': Disables the x ticks
+        'reset_index': Reset the index if True
         'legend': If False legend is disabled
         'show': If true the chart will be plt.show()
         'save': Save the image to a specified path like
             save='path_to_picture.png'
     :return: fig, ax
     """
-    if plot_columns is None:
-        # data is a list of lists
-        if isinstance(data[0], list):
-            plot_columns = list()
-            l_data = dict()
-            for i, l in enumerate(data):
-                plot_columns.append(str(i))
-                l_data[str(i)] = l
-            data = pd.DataFrame.from_dict(l_data)
-
-        # data is only one list
-        else:
-            data = pd.DataFrame.from_dict({'Series': data})
-            plot_columns = ['Series']
 
     fig, ax = _head(kwargs=kwargs, data=data)
 
@@ -955,21 +1062,25 @@ def hist(data, **kwargs):
     )
 
 
-def plot_vline(axis, index, linestyle='--', color=color_set[0]):
+def plot_vline(axis, index, linestyle='--', color=color_set[0],
+               linewidth=0.8, alpha=0.8):
     """
     Plots one vertical line
     :param axis: Axis
     :param index: Index
     :param linestyle: Can be '-', '--', '-.', ':'
     :param color: Color
+    :param linewidth: Linewidth
+    :param alpha: Alpha
     """
     axis.axvline(
         index, color=color,
-        linewidth=0.8, alpha=0.8, linestyle=linestyle
+        linewidth=linewidth, alpha=alpha,
+        linestyle=linestyle
     )
 
 
-def plot_vspan(axis, index, color=color_set[0], alpha=0.05):
+def plot_vspan(axis, index, color=color_set[0], alpha=0.2):
     """
     Plots one vertical span
     :param axis: Axis
