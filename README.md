@@ -231,7 +231,7 @@ Results:
 Plot
 -
 
-in this example we plot some stock data in two lines:
+in this example we plot some stock data in two lines of code:
 
 ```
     df = pd.read_csv('stocks.csv', index_col=0).tail(1000)
