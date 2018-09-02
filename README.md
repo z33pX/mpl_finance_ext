@@ -104,6 +104,7 @@ mfe.plot(
     fig=fig,
     xhline_red=0.8,
     xhline_green=0.2,
+    gradient_fill=True
 )
 
 plt.show()

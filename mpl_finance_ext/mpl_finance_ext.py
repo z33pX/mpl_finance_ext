@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.patches import BoxStyle
+from matplotlib.patches import Polygon
+import matplotlib.colors as mcolors
 from six.moves import xrange, zip
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -292,6 +294,8 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
 
     # Plot columns
     enable_flags = kwa.get('enable_flags', True)
+    gradient_fill = kwa.get('gradient_fill', False)
+
     if kwa.get('set_flags_at_the_end', True) \
             and data is not None:
         last_index = data.index.values[-1]
@@ -305,8 +309,35 @@ def _plot(fig, ax, kwa, legend=True, data=None, plot_columns=None):
                 series = data[col]
                 color = color_set[i % len(color_set)]
 
-                ax.plot(series, linewidth=0.7,
-                        color=color)
+                line, = ax.plot(series, linewidth=0.7, color=color)
+
+                if gradient_fill:
+                    # From https://stackoverflow.com/questions/29321835/is-it-possible-to-get-color-gradients-
+                    #           under-curve-in-matplotlib?answertab=votes#tab-top
+                    series.dropna(inplace=True)
+                    x = series.index
+                    y = series.values
+
+                    zorder = line.get_zorder()
+                    alpha = line.get_alpha()
+                    alpha = 1.0 if alpha is None else alpha
+
+                    z = np.empty((100, 1, 4), dtype=float)
+                    rgb = mcolors.colorConverter.to_rgb(color)
+                    z[:, :, :3] = rgb
+                    z[:, :, -1] = np.linspace(0, alpha, 100)[:, None]
+
+                    xmin, xmax, ymin, ymax = x.min(), x.max(), y.min(), y.max()
+                    im = ax.imshow(z, aspect='auto', extent=[xmin, xmax, ymin, ymax],
+                                   origin='lower', zorder=zorder)
+
+                    xy = np.column_stack([x, y])
+                    xy = np.vstack([[xmin, ymin], xy, [xmax, ymin], [xmin, ymin]])
+                    clip_path = Polygon(xy, facecolor='none', edgecolor='none', closed=True)
+                    ax.add_patch(clip_path)
+                    im.set_clip_path(clip_path)
+                    ax.autoscale(True)
+
                 if enable_flags:
                     add_price_flag(
                         fig=fig, axis=ax,
@@ -605,6 +636,7 @@ def plot_candlestick(
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': y label
+        'gradient_fill': If True color gradients are activated
         'title': title
         'disable_x_ticks': Disables the x ticks
         'show': If true the chart will be plt.show()
@@ -699,6 +731,7 @@ def plot_filled_ohlc(
         'xtickrotation': Angle of the x ticks
         'xlabel': x label
         'ylabel': y label
+        'gradient_fill': If True color gradients are activated
         'title': title
         'disable_x_ticks': Disables the x ticks
         'show': If true the chart will be plt.show()
@@ -786,6 +819,7 @@ def scatter(data, **kwargs):
                 alpha: Alpha
         'xlabel': x label
         'ylabel': y label
+        'gradient_fill': If True color gradients are activated
         'title': title
         'disable_x_ticks': Disables the x ticks
         'show': If true the chart will be plt.show()
@@ -924,6 +958,7 @@ def plot(data, plot_columns=None, **kwargs):
                 alpha: Alpha
         'xlabel': x label
         'ylabel': y label
+        'gradient_fill': If True color gradients are activated
         'title': title
         'disable_x_ticks': Disables the x ticks
         'reset_index': Reset the index if True
