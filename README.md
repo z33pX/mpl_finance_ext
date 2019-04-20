@@ -1,37 +1,47 @@
 # mpl_finance_ext
 
-mpl_finance_ext provides functions to plot and evaluate finance data. 
-It is a tool for experimenting with algorithms for algotrading.
+mpl_finance_ext provides simple functions to plot and evaluate algorithms for trading.
 It supports mainly these functions:
 
 * Candlestick chart -- `plot_candlestick()`
-* Filled OHLC chart  -- `plot_filled_ohlc()`
-* Plot other stuff -- `plot()`
-* Plot histogram -- `hist()`
-* Plot bar chart -- `bars()`
-* Scatter plot -- `scatter()`
-* 3D scatter plot -- `scatter_3d()`
+* Plot lines -- `plot()`
+* Plot voume -- `plot_volume()`
 
-For `plot_candlestick()` and `plot_filled_ohlc()` signal evaluation is possible. 
-That means when you have buy and sell signals provided by an algotrading algorithm 
-for example you can plot them in the graph to get a visal picture (same for candlestick patterns).
-The yield of buy and sell will be calculated and is shown in the graph as well. All this will be shown in
-a few examples below. All following code is provided in `examples/examples.py`.
+For `plot_candlestick()` signal evaluation is possible. 
+That means when you have buy and sell signals provided by an trading algorithm you can visualize them.
+The return for each trade is plotted the graph as well. Look at the examples below (Find the code in tests/test.py).
 
-First we load the data and calculate some example indicators:
+We start by loading data and calculate some example indicators:
 
 ```
-# Load dataset
-data = pd.read_csv('BTC_XRP_5min.csv', index_col=0)
+if __name__ == "__main__":
+    # Load dataset
+    df = pd.read_csv('BTC_XRP_5min.csv', index_col=0)
 
-# Calculate indicators
-data = relative_strength_index(df=data, n=14)
-data = bollinger_bands(df=data, n=20, std=4)
-data = exponential_moving_average(df=data, n=8)
-data = moving_average(df=data, n=36)
+    # Calculate indicators
+    df = relative_strength_index(df=df, n=14)
+    df = bollinger_bands(df=df, n=20, std=4)
+    df = exponential_moving_average(df=df, n=8)
+    df = moving_average(df=df, n=36)
 
-# Now we set some signals and patterns
-# Some manually picked signals
+    # Start tests
+    test_1(df=df)
+
+    test_2(df=df.head(20))
+
+    test_3()
+```
+
+Plot candlestick charts (test_1)
+-
+After we prepared data we create a figure and an axis we plot 
+candlesticks + signals and indicators on the first axis and the rsi 
+on a second one.
+
+```
+# Prepare some signals
+# Structure: [(signal, index, price), ... ].
+# signal can be either 'BUY' or 'SELL'
 signals = [
     ('BUY', 12, 0.69), ('SELL', 27, 0.7028),
     ('BUY', 56, 0.6563), ('SELL', 81, 0.6854),
@@ -39,245 +49,170 @@ signals = [
     ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
 ]
 
-# One manually picked candlestick pattern
-patterns = [
-    ['inverted_hammer', 12, 13]
-]
-```
-
-Plot candlestick charts
--
-After we prepared the data we create a figure and an axis and plot 
-the candlesticks plus some indicators on one axis and the rsi 
-on a seperate axis:
-
-```
 # Create fig
-fig, _ = plt.subplots(facecolor=mfe.background_color)
+fig, _ = plt.subplots(facecolor=mfe.cb)
 
 # Create first axis
 ax0 = plt.subplot2grid(
-    (8, 4), (0, 0),
-    rowspan=4, colspan=4,
-    facecolor=mfe.background_color
-)
+    (8, 4), (0, 0), rowspan=4, colspan=4, facecolor=mfe.cb)
 
 # Add content to the first axis.
-# 1) Candlestick chart
-# 2) Bollinger Bands 20
-# 3) Moving Average 36
-# 4) Exponential Moving Average 8
-_, _ = mfe.plot_candlestick(
+mfe.plot_candlestick(
     fig=fig,
     axis=ax0,
-    data=data,
-    name='BTC_XRP_5min',
+    data=df,
+    title='BTC_XRP_5min',
     signals=signals,
-    plot_columns=[
-        'bband_upper_20', 'bband_lower_20',
+    columns=[
+        'bband_upper_20', 'bband_Lower_20',
         'MA_36', 'EMA_8'
     ],
-    draw_verticals=False,
-    draw_evaluation=True,
-    evaluation='rectangle',
-    disable_x_ticks=True
+    disable_xticks=False,
 )
-```
 
-Now we plot the RSI_14 data on a separate axis with the `plot()` function:
+# Just to show what is possible
+# mfe.plot_volume(
+#     twin_axis=ax0,
+#     fig=fig,
+#     data=df
+# )
 
-```
 # Create second axis
 ax1 = plt.subplot2grid(
-    (8, 4), (4, 0),
-    rowspan=4, colspan=4, sharex=ax0,
-    facecolor=mfe.background_color
-)
+    (8, 4), (4, 0), rowspan=4, colspan=4, sharex=ax0,
+    facecolor=mfe.cb)
 
 # Add content to the second axis.
-# 1) RSI 14
 mfe.plot(
-    data=data,
-    name='RSI_14',
-    plot_columns=['RSI_14'],
     axis=ax1,
     fig=fig,
-    xhline_red=0.8,
-    xhline_green=0.2,
-    gradient_fill=True
+    data=df,
+    name='RSI 2',
+    columns=['RSI_14'],
+    hlines=[
+        {'index': 0.8, 'color': 'red'},
+        {'index': 0.2, 'color': 'green'}
+    ]
 )
 
 plt.show()
 ```
 
-The result looks like this:
+Result:
 
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_01.png)
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_1.png)
 
 For further explanations for the parameters please look into the function descriptions. 
 
-
-Plot filled OHLC charts
--
-`plot_filled_ohlc()` works exactly like `plot_candlestick()`.
-
-```
-fig, ax = mfe.plot_filled_ohlc(
-    data=data,
-    name='BTC_XRP_5min',
-    signals=signals,
-    plot_columns=[
-        'bband_upper_20', 'bband_lower_20',
-        'MA_36', 'EMA_8'
-    ],
-    draw_verticals=False,
-    draw_evaluation=True,
-    evaluation='rectangle',
-    # save='BTC_XRP_5min_filled.png'
-    )
-```
-
-Result:
-
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_02.png)
-
-Signal evaluation
+Candlestick pattern evaluation (test_2)
 -
 
-As mentioned in earlier examples the signal evaluation can be activated
-by defining a list of signals and set parameter `signals=signals` of
-`plot_filled_ohlc()` or `plot_candlestick()`:
+To plot a list of candlestick patterns just set the parameter `cs_patterns` 
+to a valid list of patterns like. Structure of the list: `[ ... ,['pattern_name', start_index, stop_index], ... ]`
 
 ```
-signals = [
-    ('BUY', 12, 0.69), ('SELL', 27, 0.7028),
-    ('BUY', 56, 0.6563), ('SELL', 81, 0.6854),
-    ('BUY', 106, 0.665), ('SELL', 165, 0.640),
-    ('BUY', 183, 0.66), ('SELL', 202, 0.7063),
-]
-```
-Structure of the list: `[ ..., (signal, index, price), ... ]`. 
-Signals can be either `'BUY'` or `'SELL'`.
-
-In previous examples you can see that the signals are visualised in form of rectangles.
-Instead of rectangles you can activate arrows with `evaluation='arrow_1'`.
-It will look like this:
-
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_03.png)
-
-Candlestick pattern evaluation
--
-
-To plot a list of candlestick patterns just set the parameter `cs_patterns=cs_patterns` 
-to a valid list of patterns like:
-
-```
+# One manually picked candlestick pattern:
 patterns = [
     ['inverted_hammer', 12, 13]
 ]
-```
 
-Structure of the list: `[ ... ,['pattern_name', start_index, stop_index], ... ]`
+# 'bu_' infornt of the name paints it green, 'be_' red
+# Example: 'bu_inverted_hammer'
 
-Result:
-
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_04.png)
-
-Bar and histogram charts
--
-
-As shown in example 4 in `examples.py` a histogram will be created like
-```
-mu, sigma = 100, 15
-x = mu + sigma * np.random.randn(10000)
-    
-mfe.hist(
-    fig=fig,
-    axis=ax2,
-    data_dict=x,
-    bins=50,
-    density=1,
-    xlabel='Returns',
-    ylabel='Probability density'
-)
-```
-and a bar chart like 
-```
-pattern_history = [
-    'berish_hanging_man',
-    'bulish_hammer',
-    'berish_dark_cloud_cover',
-    'bulish_piercing_line',
-    'berish_dark_cloud_cover',
-    'berish_dark_cloud_cover',
-    'bulish_hammer',
-    'berish_hanging_man',
-    'bulish_hammer',
-    'bulish_morning_star',
+# And we add some Support and Resistance lines
+lines = [
+    {'start': [3.5, 0.711], 'stop': [20, 0.711]},
+    {'start': [10, 0.688], 'stop': [20, 0.688]}
 ]
 
-mfe.bar(
-    fig=fig,
-    axis=ax3,
-    data_dict=pattern_history,
-    xlabel='Amount',
-    ylabel='Patterns overall'
+mfe.plot_candlestick(
+    data=df,
+    name='BTC_XRP_5min',
+    cs_patterns=patterns,
+    columns=[
+        'bband_upper_20', 'bband_Lower_20',
+        'MA_36', 'EMA_8'
+    ],
+    draw_verticals=False,
+    lines=lines,
+    # save='BTC_XRP_5min_candlestick.png'
 )
-```
-Results:
-
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_05.png)
-
-Plot
--
-
-in this example we plot some stock data in two lines of code:
-
-```
-    df = pd.read_csv('stocks.csv', index_col=0).tail(1000)
-    mfe.plot(df / df.iloc[0], gradient_fill=True)
 ```
 
 Result:
 
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_07.png)
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_2.png)
 
-
-3D Scatter
+Plot (test_3)
 -
 
-- `data`: The data structure is a list of tripls like `[(x, y, z), (x, y, z)]`.
-- `threshold`: Defines the threshold of the classification.
-- `class_conditions`: This list contains the class values of the triples. If the value is less than the
-threshold value it is considered class a otherwise class b. The list must have the same length as the data list.
+In this example we plot stock data. Additionally we'll see what functions else are available
 
-Example:
 ```
-data = list()
-class_conditions = list()
-samples = 30
+# Read and prepare data
+df = pd.read_csv('stocks.csv', index_col=False).tail(1000)
+date = df['Date']
+df = df.drop(['Date'], axis=1)
 
-# Create some data
-for i in range(samples):
-    data.append((i, i, i))
-    if i < samples / 2:
-        class_conditions.append(1)
-    else:
-        class_conditions.append(2)
+# List of vlines:
+# [index_1, index_2, ...] or
+# [{'index':..., 'color':..., 'linewidth':..., 'alpha':..., 'linestyle':...,}, ...]
+vlines = [50, 150]
 
-# Graph everything
-mfe.scatter_3d(
-    data=data,
-    class_conditions=class_conditions,
-    threshold=1,
-    show=True,
-    xlabel='X',
-    ylabel='Y',
-    zlabel='Z'
+# List of hlines:
+# [index_1, index_2, ...] or
+# [{'index':..., 'color':..., 'linewidth':..., 'alpha':..., 'linestyle':...,}, ...]
+hlines = [
+    {'index': 3.5, 'color': 'red', 'linewidth': 0.8, 'alpha': 0.8, 'linestyle': ':'},
+    {'index': 4, 'color': 'red', 'linewidth': 0.8, 'alpha': 0.8, 'linestyle': ':'}
+]
+
+# List of lines
+# [{'start': [x, y], 'stop': [x, y], 'color':..., 'linewidth':..., 'alpha':..., 'linestyle':...,}, ...]
+lines=[
+    {'start': [50, 3.5], 'stop': [150, 4]},
+    {'start': [50, 4], 'stop': [150, 3.5]}
+]
+
+mfe.plot(df / df.iloc[0], columns=['AMZN', 'AMD', 'GOOGL'],
+    xticks=date,
+    gradient_fill=True,
+    xlabel='Date',
+    ylabel='Price',
+    title='Stocks',
+    vspans=[[50, 150]],    # List of vspans: [[start index, end index], ...]
+    hspans=[[3.5, 4]],     # List of hspans: [[start index, end index], ...]
+    vlines=vlines,
+    hlines=hlines,
+    lines=lines
 )
 ```
+
 Result:
 
-![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_06.png)
+![](https://github.com/z33pX/mpl_finance_ext/blob/master/pic_3.png)
 
+Change colors
+-
+Change colors by edeting the config file:
 
+```
+{
+  "colors": {
+    "labels": "#bcbdbe",
+    "background": "#283136",
+    "red": "#db206c",
+    "green": "#69a431",
+    "sets": ["#ffb93b", "#ff32f7", "#69a431", "#c17113", "#0d8382"],
+    "grid": "#666666",
+    "yaxis_labels": "#d3d3d3",
+    "xaxis_labels": "#d3d3d3",
+    "yaxis_params": "#d3d3d3",
+    "xaxis_params": "#d3d3d3",
+    "main_spine": "#666666",
+    "price_flag": "#283136",
+    "signal_eval_label": "#bcbdbe"
+
+  }
+}
+```

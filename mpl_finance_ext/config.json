@@ -1,0 +1,18 @@
+{
+  "colors": {
+    "labels": "#bcbdbe",
+    "background": "#283136",
+    "red": "#db206c",
+    "green": "#69a431",
+    "sets": ["#ffb93b", "#ff32f7", "#69a431", "#c17113", "#0d8382"],
+    "grid": "#666666",
+    "yaxis_labels": "#d3d3d3",
+    "xaxis_labels": "#d3d3d3",
+    "yaxis_params": "#d3d3d3",
+    "xaxis_params": "#d3d3d3",
+    "main_spine": "#666666",
+    "price_flag": "#283136",
+    "signal_eval_label": "#bcbdbe"
+
+  }
+}

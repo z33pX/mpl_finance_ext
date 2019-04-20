@@ -1,4 +1,5 @@
 import matplotlib.patches as patches
+from .config import config
 
 
 def truncate(f, n):
@@ -12,20 +13,16 @@ def truncate(f, n):
 def draw_verticals(axis, signals):
     for signal in signals:
         if signal[0] is 'SELL':
-            axis.axvline(signal[1], color='red',
+            axis.axvline(signal[1], color=config['colors']['red'],
                          linewidth=0.8,
                          alpha=0.8, linestyle='-')
         if signal[0] is 'BUY':
-            axis.axvline(signal[1], color='green',
+            axis.axvline(signal[1], color=config['colors']['green'],
                          linewidth=0.8,
                          alpha=0.8, linestyle='-')
 
 
 def draw_signal_evaluation(axis, signals, **kwargs):
-
-    if not signals:
-        raise ValueError('The given list of signals is empty')
-
     signal_pairs = list()
 
     # Create list of BUY and SELL pairs --------------
@@ -49,8 +46,8 @@ def draw_signal_evaluation(axis, signals, **kwargs):
     # http://matthiaseisen.com/pp/patterns/p0203/
 
     eval_type = kwargs.get('eval_type', 'rectangle')
-    red = kwargs.get('red', 'red')
-    green = kwargs.get('green', 'green')
+    red = kwargs.get('red', config['colors']['red'])
+    green = kwargs.get('green', config['colors']['green'])
 
     objects = list()
     ax = axis._make_twin_axes(sharex=axis, sharey=axis)
@@ -91,10 +88,10 @@ def draw_signal_evaluation(axis, signals, **kwargs):
             green_dots_y.append(y + h)
 
         if (h < 0 and kwargs.get(
-                'disable_red_signals', False
+                'disable_losing_trades', False
             ) is False) or \
            (h > 0 and kwargs.get(
-               'disable_green_signals', False
+               'disable_winning_trades', False
            ) is False):
 
             if eval_type is 'arrow_1':
@@ -137,7 +134,7 @@ def draw_signal_evaluation(axis, signals, **kwargs):
 
             ax.annotate(
                 str(change), (cx, cy),
-                color='#535353',
+                color=config['colors']['signal_eval_label'],
                 fontsize=12, ha='center',
                 va='center',
                 bbox=bbox,
@@ -147,7 +144,7 @@ def draw_signal_evaluation(axis, signals, **kwargs):
     # Add dots
     if kwargs.get('dots', True):
         if green_dots_x and kwargs.get(
-                'disable_green_signals', False) is False:
+                'disable_winning_trades', False) is False:
             ax.scatter(
                 green_dots_x, green_dots_y,
                 s=10, marker='o', color=green,
@@ -155,7 +152,7 @@ def draw_signal_evaluation(axis, signals, **kwargs):
             )
 
         if red_dots_x and kwargs.get(
-                'disable_red_signals', False) is False:
+                'disable_losing_trades', False) is False:
             ax.scatter(
                 red_dots_x, red_dots_y,
                 s=10, marker='o', color=red,
