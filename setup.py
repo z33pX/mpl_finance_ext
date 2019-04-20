@@ -18,5 +18,6 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/z33pX/mpl_finance_ext",
     packages=find_packages(),
-    license=license
+    license=license,
+    include_package_data=True
 )
